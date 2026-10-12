@@ -1,5 +1,15 @@
-export type GameSlug = '2048' | 'word-game' | 'endless-runner' | 'match-3' | 'connect-4';
-export type Category = 'Puzzle' | 'Word' | 'Arcade' | 'Multiplayer';
+export type GameSlug =
+  | '2048'
+  | 'word-game'
+  | 'endless-runner'
+  | 'match-3'
+  | 'connect-4'
+  | 'metro-runner'
+  | 'car-racing'
+  | 'ludo'
+  | 'monopoly'
+  | 'strike-zone';
+export type Category = 'Puzzle' | 'Word' | 'Arcade' | 'Multiplayer' | 'Racing' | 'Board' | 'Action';
 export interface Game {
   slug: GameSlug;
   name: string;
@@ -10,6 +20,7 @@ export interface Game {
   featured?: boolean;
   instructions: string[];
   tag: string;
+  localOnly?: boolean;
 }
 export interface LeaderboardRow {
   user_id: string;

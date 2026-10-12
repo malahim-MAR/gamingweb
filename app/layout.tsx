@@ -2,16 +2,17 @@ import type { Metadata, Viewport } from 'next';
 import { Providers } from '@/components/providers';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
+import { PageMotion } from '@/components/page-motion';
 import './globals.css';
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   title: { default: 'Playroom — A little play, every day.', template: '%s · Playroom' },
   description:
-    'Your happy place for quick games. Play 2048, daily word puzzles, Cloud Runner, Sweet Shuffle, and Four in a Row.',
+    'Your happy place for quick games. Play runners, car racing, Ludo, property trading, a first-person arena, and classic puzzles.',
   manifest: '/manifest.webmanifest',
   openGraph: {
     title: 'Playroom — A little play, every day.',
-    description: 'Five little games. Endless good times.',
+    description: 'Ten little games. Endless good times.',
     type: 'website',
     images: ['/opengraph-image'],
   },
@@ -32,7 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </a>
           <Header />
           <main id="main" className="min-h-[65vh]">
-            {children}
+            <PageMotion>{children}</PageMotion>
           </main>
           <Footer />
         </Providers>

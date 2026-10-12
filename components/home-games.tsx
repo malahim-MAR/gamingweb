@@ -1,6 +1,17 @@
 'use client';
 import { useState } from 'react';
-import { Sparkles, LayoutGrid, Brain, Type, Zap, Users, Heart } from 'lucide-react';
+import {
+  Sparkles,
+  LayoutGrid,
+  Brain,
+  Type,
+  Zap,
+  Users,
+  Heart,
+  Car,
+  Dice5,
+  Crosshair,
+} from 'lucide-react';
 import { GameCard } from '@/components/game-card';
 import { usePreferences } from '@/store/preferences';
 import type { Game } from '@/types';
@@ -13,6 +24,9 @@ export function HomeGames({ games }: { games: Game[] }) {
     ['Word', Type],
     ['Arcade', Zap],
     ['Multiplayer', Users],
+    ['Racing', Car],
+    ['Board', Dice5],
+    ['Action', Crosshair],
     ['Favorites', Heart],
   ] as const;
   const shown = games.filter(

@@ -32,7 +32,7 @@ export function Catalog({ games }: { games: Game[] }) {
           value={category}
           onChange={(e) => setCategory(e.target.value)}
         >
-          {['All categories', 'Puzzle', 'Word', 'Arcade', 'Multiplayer'].map((c) => (
+          {['All categories', ...new Set(games.map((g) => g.category))].map((c) => (
             <option key={c}>{c}</option>
           ))}
         </select>

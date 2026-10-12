@@ -1,10 +1,13 @@
 import { Cloud, Star } from 'lucide-react';
 import type { GameSlug } from '@/types';
+import { NewGameArt } from '@/components/new-game-art';
 export function GameArt({ slug, className = '' }: { slug: GameSlug; className?: string }) {
   return (
     <div className={`game-art ${className}`} aria-hidden="true">
       <div className="art-grid" />
-      {slug === '2048' ? (
+      {['metro-runner', 'car-racing', 'ludo', 'monopoly', 'strike-zone'].includes(slug) ? (
+        <NewGameArt slug={slug} />
+      ) : slug === '2048' ? (
         <div className="grid rotate-[-8deg] grid-cols-2 gap-2">
           {[2, 8, 16, 2048].map((n, i) => (
             <div

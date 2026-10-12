@@ -22,11 +22,11 @@ export const activeGames = unstable_cache(
       .eq('enabled', true);
     if (error) return games;
     return games
-      .filter((g) => data.some((d) => d.slug === g.slug))
+      .filter((g) => g.localOnly || data.some((d) => d.slug === g.slug))
       .map((g) => ({
         ...g,
-        premium: !!data.find((d) => d.slug === g.slug)?.premium,
-        featured: !!data.find((d) => d.slug === g.slug)?.featured,
+        premium: g.localOnly ? false : !!data.find((d) => d.slug === g.slug)?.premium,
+        featured: g.localOnly || !!data.find((d) => d.slug === g.slug)?.featured,
       }));
   },
   ['catalog'],

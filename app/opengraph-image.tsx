@@ -7,7 +7,7 @@ export default function Image() {
   return new ImageResponse(
     <OgCard
       name="A little play. A lot of happy."
-      description="Five little games. Endless good times."
+      description="Ten little games. Endless good times."
     />,
     size,
   );

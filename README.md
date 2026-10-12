@@ -1,6 +1,6 @@
 # Playroom
 
-A Next.js 15 App Router gaming platform with TypeScript, Tailwind CSS, shadcn/ui components, Supabase Auth/Postgres/Realtime, Stripe subscriptions, Zustand preferences, and Zod validation. Five isolated, lazy-loaded Canvas games are included. The supplied Supabase public URL and publishable key are configured in the ignored `.env.local` on this checkout.
+A Next.js 15 App Router gaming platform with TypeScript, Tailwind CSS, shadcn/ui components, Supabase Auth/Postgres/Realtime, Stripe subscriptions, Zustand preferences, and Zod validation. Ten isolated, lazy-loaded games are included. The supplied Supabase public URL and publishable key are configured in the ignored `.env.local` on this checkout.
 
 ## Run locally
 
@@ -23,6 +23,17 @@ npm start
 ```
 
 On this Windows checkout you can also run `powershell -ExecutionPolicy Bypass -File scripts/start-local.ps1`; it finds the portable Node installation used during development. The execution-policy override applies to this invocation only. `npm run test:browser` runs the desktop/mobile Playwright checks against a production build and requires Google Chrome.
+
+To test a production build while the development server is running, use an isolated build directory and port in PowerShell:
+
+```powershell
+$env:PLAYROOM_BUILD_DIR = '.next-production'
+$env:NEXT_PUBLIC_SITE_URL = 'http://localhost:3001'
+npm.cmd run build
+$env:PLAYROOM_TEST_PORT = '3001'
+$env:PLAYROOM_TEST_ORIGIN = 'http://localhost:3001'
+npm.cmd run test:browser -- --workers=1
+```
 
 There is no external image or font dependency. All artwork is rendered from local SVG, CSS, and Canvas. App icons are checked in.
 
@@ -102,6 +113,16 @@ Checkout redirects never grant Premium. Only a signature-verified webhook update
 The runtime does not need a direct Postgres connection. Supabase is accessed through its HTTPS API. Public leaderboards and game settings are cached with Next's `unstable_cache` (30/60 seconds); successful score/admin writes invalidate the appropriate tags. Authenticated data and APIs are not cached in the service worker. Middleware refreshes auth cookies and protects `/profile` and `/admin`; sensitive route handlers also authenticate independently.
 
 ## Games and score validation
+
+The five new games below run locally for both guests and signed-in players, without database setup or Premium. Completed rounds save their best score in browser local storage; they do not submit ranked scores. Ludo and Property Club offer a computer opponent or two players on the same device. Property Club is a simplified Monopoly-style game without auctions, mortgages, houses, or online rooms.
+
+- **Metro Rush:** a forward-facing, three-lane runner. Arrows/WASD switch lanes, jump, and slide. Space jumps. Swipe on the track or use touch buttons. Dodge trains, clear barriers and gates, and collect coins as speed increases.
+- **Sunset Circuit:** a perspective highway race over 3 km. Hold arrows/WASD or touch controls to steer, accelerate, and brake. Traffic collisions cost a life; the shoulder slows the car. Three crashes end the race.
+- **Ludo Lounge:** two colors with four tokens each, a 52-square track, safe squares, captures, extra rolls on sixes/captures, and exact rolls to finish. Roll and select a highlighted token. Bring all four home to win.
+- **Property Club:** a 24-square property board. Roll, buy or pass, collect rent, double rent by completing color groups, and pass GO for $200. Includes chance cards, tax, and jail. Bankruptcy or 24 turns ends the game, with property value included in net worth.
+- **Strike Zone:** a basic raycast first-person arena with three bot waves, cover, pathfinding, health, a 12-round magazine, and reloading. WASD moves, arrows or view dragging turns, click/Space fires, and R reloads. Touch controls support phones.
+
+All pages have entrance transitions, off-screen scroll reveals, interactive hover/press feedback, and animated game artwork. Dialogs, dice, and selectable Ludo tokens animate. Decorative animations respect `prefers-reduced-motion`; gameplay remains responsive to controls.
 
 - **2048:** arrow keys, WASD, swipe, or direction buttons. Every valid move is recorded and replayed with the server-issued seed; blocked moves consume no randomness. Use Save & finish or play until the board is full.
 - **Word Club:** six dictionary-checked guesses. The answer stays server-side until the round ends. Guesses are locked in Postgres, allowing resume and preventing parallel requests from adding extra tries. One ranked attempt per user per UTC day. Practice uses a sample word. Results can be shared without revealing the answer.

@@ -37,7 +37,7 @@ export default function Pricing() {
           </Button>
           <ul className="mt-8 space-y-4">
             {[
-              'Four free games',
+              'Nine free games',
               'Daily Word Club challenge',
               'Verified scores & leaderboards',
               'Private multiplayer rooms',

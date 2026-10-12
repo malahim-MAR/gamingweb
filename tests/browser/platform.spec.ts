@@ -4,12 +4,12 @@ test('landing, filters, and responsive layout', async ({ page }, info) => {
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'A little play. A lot of happy.' })).toBeVisible();
-  await expect(page.locator('article')).toHaveCount(5);
+  await expect(page.locator('article')).toHaveCount(10);
   await page.getByRole('button', { name: 'Arcade', exact: true }).click();
-  await expect(page.locator('article')).toHaveCount(1);
+  await expect(page.locator('article')).toHaveCount(2);
   await expect(page.getByRole('heading', { name: 'Cloud Runner' })).toBeVisible();
   await page.getByRole('button', { name: 'All games', exact: true }).click();
-  await expect(page.locator('article')).toHaveCount(5);
+  await expect(page.locator('article')).toHaveCount(10);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
     true,
   );
@@ -82,7 +82,7 @@ test('auth guards, billing sign-in, and metadata', async ({ page, request }) => 
   const manifest = await request.get('/manifest.webmanifest');
   expect((await manifest.json()).short_name).toBe('Playroom');
   const api = await request.post('/api/scores', {
-    headers: { origin: 'http://localhost:3000' },
+    headers: { origin: process.env.PLAYROOM_TEST_ORIGIN || 'http://localhost:3000' },
     data: { score: 999999 },
   });
   expect(api.status()).toBe(401);

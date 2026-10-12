@@ -19,6 +19,11 @@ const gameComponents = {
   'endless-runner': dynamic(() => import('@/games/endless-runner'), { ssr: false, loading }),
   'match-3': dynamic(() => import('@/games/match-3'), { ssr: false, loading }),
   'connect-4': dynamic(() => import('@/games/connect-4'), { ssr: false, loading }),
+  'metro-runner': dynamic(() => import('@/games/metro-runner'), { ssr: false, loading }),
+  'car-racing': dynamic(() => import('@/games/car-racing'), { ssr: false, loading }),
+  ludo: dynamic(() => import('@/games/ludo'), { ssr: false, loading }),
+  monopoly: dynamic(() => import('@/games/monopoly'), { ssr: false, loading }),
+  'strike-zone': dynamic(() => import('@/games/strike-zone'), { ssr: false, loading }),
 };
 interface Session {
   id?: string;
@@ -61,7 +66,7 @@ export function GameShell({
     setPending(null);
     setSession(null);
     try {
-      if (signedIn && game.slug !== 'connect-4') {
+      if (signedIn && !game.localOnly && game.slug !== 'connect-4') {
         const res = await fetch('/api/sessions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -73,9 +78,11 @@ export function GameShell({
       } else {
         setSession({ seed: crypto.getRandomValues(new Uint32Array(1))[0] });
         setStatus(
-          game.slug === 'connect-4'
-            ? 'Online results save automatically. Local games are for practice.'
-            : 'Practice mode. Sign in to save scores and build a streak.',
+          game.localOnly
+            ? 'Local play. Scores for this game stay on this device.'
+            : game.slug === 'connect-4'
+              ? 'Online results save automatically. Local games are for practice.'
+              : 'Practice mode. Sign in to save scores and build a streak.',
         );
       }
       setRun((n) => n + 1);
@@ -84,7 +91,7 @@ export function GameShell({
     } finally {
       setStarting(false);
     }
-  }, [gated, signedIn, game.slug]);
+  }, [gated, signedIn, game.slug, game.localOnly]);
   useEffect(() => {
     if (!started.current) {
       started.current = true;
@@ -128,9 +135,19 @@ export function GameShell({
     (points: number, actions: unknown[]) => {
       setScore(points);
       setResult(true);
+      if (game.localOnly) {
+        try {
+          const key = `playroom:best:${game.slug}`;
+          const best = Math.max(points, Number(localStorage.getItem(key)) || 0);
+          localStorage.setItem(key, String(best));
+          setStatus(`Local best: ${best.toLocaleString()} points. Saved on this device.`);
+        } catch {
+          setStatus('Local round complete.');
+        }
+      }
       void submit({ score: points, actions });
     },
-    [submit],
+    [submit, game.localOnly, game.slug],
   );
   const scoreChange = useCallback((points: number) => setScore(points), []);
   const GameComponent = gameComponents[game.slug];
@@ -285,7 +302,7 @@ export function GameShell({
             <Link href="/games">More games</Link>
           </Button>
         </div>
-        {!signedIn && (
+        {!signedIn && !game.localOnly && (
           <Link
             href="/signup"
             className="mt-5 block text-center text-xs font-semibold text-primary"

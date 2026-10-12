@@ -32,7 +32,10 @@ export default async function GamePage({ params }: { params: Promise<{ slug: str
   if (!game) notFound();
   const user = await getUser();
   const premium = user ? await isPremium(user.id) : false;
-  const [ranks, flags] = await Promise.all([leaderboard(game.slug), featureFlags()]);
+  const [ranks, flags] = await Promise.all([
+    game.localOnly ? Promise.resolve({ rows: [], available: false }) : leaderboard(game.slug),
+    featureFlags(),
+  ]);
   return (
     <div className="layout py-8">
       <div className="mb-6 flex items-center gap-2 text-xs text-muted-foreground">
@@ -93,17 +96,33 @@ export default async function GamePage({ params }: { params: Promise<{ slug: str
         <aside className="surface p-5">
           <h2 className="flex items-center gap-2 text-base font-bold">
             <Trophy size={17} className="text-[#b7975a]" />
-            The high-score club
+            {game.localOnly ? 'Your own little challenge' : 'The high-score club'}
           </h2>
-          <p className="mb-4 mt-2 text-xs text-muted-foreground">A little friendly motivation.</p>
-          <LeaderboardTable {...ranks} compact />
-          <Link
-            className="mt-5 flex items-center justify-center gap-2 text-xs font-semibold"
-            href={`/leaderboard?game=${game.slug}`}
-          >
-            See the full leaderboard
-            <ArrowUpRight size={14} />
-          </Link>
+          <p className="mb-4 mt-2 text-xs text-muted-foreground">
+            {game.localOnly
+              ? 'Play freely, right here in your browser.'
+              : 'A little friendly motivation.'}
+          </p>
+          {game.localOnly ? (
+            <div className="rounded-xl bg-muted p-4 text-xs leading-6 text-muted-foreground">
+              Your best score saves on this device. Use the pause button for a breather, or restart
+              for a fresh round.{' '}
+              {game.category === 'Board'
+                ? 'Choose the computer or play with a friend on the same device.'
+                : 'Keyboard and touch controls are both available.'}
+            </div>
+          ) : (
+            <>
+              <LeaderboardTable {...ranks} compact />
+              <Link
+                className="mt-5 flex items-center justify-center gap-2 text-xs font-semibold"
+                href={`/leaderboard?game=${game.slug}`}
+              >
+                See the full leaderboard
+                <ArrowUpRight size={14} />
+              </Link>
+            </>
+          )}
         </aside>
       </div>
       <section className="mt-12">
