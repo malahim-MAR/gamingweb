@@ -1,0 +1,195 @@
+@import 'tailwindcss';
+@config '../tailwind.config.ts';
+@layer base {
+  :root {
+    --background: 48 28% 96%;
+    --foreground: 145 12% 16%;
+    --card: 0 0% 100%;
+    --muted: 45 16% 91%;
+    --border: 45 14% 87%;
+    --muted-foreground: 145 5% 43%;
+  }
+  .dark {
+    --background: 150 12% 10%;
+    --foreground: 48 25% 94%;
+    --card: 150 10% 14%;
+    --muted: 150 8% 20%;
+    --border: 150 7% 24%;
+    --muted-foreground: 145 5% 66%;
+  }
+  * {
+    border-color: hsl(var(--border));
+  }
+  body {
+    background: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+  button,
+  a,
+  input,
+  select {
+    -webkit-tap-highlight-color: transparent;
+  }
+  button {
+    touch-action: manipulation;
+  }
+  a,
+  button,
+  input,
+  select {
+    outline-offset: 5px;
+  }
+  ::selection {
+    background: #efbd6c;
+    color: #29342d;
+  }
+  canvas {
+    display: block;
+    max-width: 100%;
+  }
+  input,
+  select {
+    background: hsl(var(--card));
+    color: hsl(var(--foreground));
+  }
+  input:focus,
+  select:focus {
+    outline: 2px solid #ec633c;
+    outline-offset: 2px;
+  }
+}
+@layer components {
+  .layout {
+    @apply mx-auto w-full max-w-[1280px] px-6 lg:px-10;
+  }
+  .text-muted-foreground {
+    color: hsl(var(--muted-foreground));
+  }
+  .site-header {
+    @apply border-b border-border;
+  }
+  .logo {
+    @apply flex items-center text-[27px] font-extrabold tracking-[-1.2px];
+  }
+  .logo-mark {
+    @apply mr-2.5 flex h-10 w-10 rotate-[-8deg] items-center justify-center rounded-xl bg-primary text-white;
+  }
+  .nav-link {
+    @apply relative py-8 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground;
+  }
+  .nav-link.active {
+    @apply text-foreground;
+  }
+  .nav-link.active:after {
+    content: '';
+    @apply absolute bottom-5 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-primary;
+  }
+  .eyebrow {
+    @apply text-[11px] font-bold uppercase tracking-[2px];
+  }
+  .section-title {
+    @apply text-2xl font-bold tracking-[-0.8px] sm:text-[30px];
+  }
+  .page-title {
+    @apply text-4xl font-extrabold tracking-[-1.7px] sm:text-5xl;
+  }
+  .surface {
+    @apply rounded-2xl border border-border bg-card;
+  }
+  .field {
+    @apply h-12 w-full rounded-xl border border-border px-4 text-sm;
+  }
+  .pill {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium;
+  }
+  .game-card {
+    @apply block overflow-hidden rounded-2xl border border-border bg-card transition-all duration-200 hover:-translate-y-1 hover:shadow-lg;
+  }
+  .game-art {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .art-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(#ffffff18 1px, transparent 1px),
+      linear-gradient(90deg, #ffffff18 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+  .hero {
+    position: relative;
+    overflow: hidden;
+    background: #e9ece2;
+    border: 1px solid #e0e4d8;
+  }
+  .dark .hero {
+    background: #28352c;
+    border-color: #3c4d40;
+  }
+  .floating-card {
+    position: absolute;
+    border-radius: 18px;
+    box-shadow: 0 14px 35px #2436291a;
+  }
+  .tiny-star {
+    position: absolute;
+    color: #e99c41;
+    font-size: 27px;
+  }
+  .tile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-weight: 800;
+  }
+  .hero-art {
+    position: relative;
+    min-height: 350px;
+  }
+  .game-canvas {
+    width: 100%;
+    height: auto;
+    touch-action: none;
+    outline: none;
+    border-radius: 16px;
+  }
+  .game-canvas:focus-visible {
+    box-shadow: 0 0 0 3px #ec633c;
+  }
+  .stat-label {
+    @apply text-xs text-muted-foreground;
+  }
+  .empty {
+    @apply rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .float-one {
+    animation: bob 6s ease-in-out infinite;
+  }
+  .float-two {
+    animation: bob 7s ease-in-out infinite reverse;
+  }
+  @keyframes bob {
+    50% {
+      transform: translateY(-9px) rotate(2deg);
+    }
+  }
+}
+@media (max-width: 640px) {
+  .hero-art {
+    min-height: 290px;
+    transform: scale(0.86);
+    transform-origin: center;
+  }
+  .layout {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}

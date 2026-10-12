@@ -1,0 +1,3 @@
+project_id = "playroom"
+[functions.daily-challenge]
+verify_jwt = false
