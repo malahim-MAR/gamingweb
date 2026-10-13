@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { usePinnedThree } from './shooter-fixture';
 async function seedGame(page: import('@playwright/test').Page, seed: number) {
   await page.addInitScript((value) => {
     const original = crypto.getRandomValues.bind(crypto);
@@ -15,6 +16,7 @@ async function seedGame(page: import('@playwright/test').Page, seed: number) {
 }
 test('new categories, artwork and all five game routes', async ({ page }, info) => {
   test.setTimeout(90000);
+  await usePinnedThree(page);
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto('/games');
@@ -31,19 +33,27 @@ test('new categories, artwork and all five game routes', async ({ page }, info) 
     ['car-racing', 'Sunset Circuit', 'canvas'],
     ['ludo', 'Ludo Lounge', '.ludo-board'],
     ['monopoly', 'Property Club', '.property-board'],
-    ['strike-zone', 'Strike Zone', 'canvas'],
+    ['strike-zone', 'Strike Zone', 'iframe'],
   ]) {
     await page.goto(`/games/${slug}`);
     await expect(page.getByRole('heading', { name, exact: true }).first()).toBeVisible();
     await expect(page.locator(selector).first()).toBeVisible({ timeout: 15000 });
+    if (slug === 'strike-zone')
+      await expect(page.frameLocator('iframe').locator('#menu-status')).toContainText(
+        'Arena ready',
+        { timeout: 30000 },
+      );
     await page.locator(selector).first().scrollIntoViewIfNeeded();
     await page.waitForTimeout(850);
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
     ).toBe(true);
-    await page.locator(selector).first().screenshot({
-      path: `test-results/${info.project.name}-${slug}.png`,
-    });
+    await page
+      .locator(selector)
+      .first()
+      .screenshot({
+        path: `test-results/${info.project.name}-${slug}.png`,
+      });
   }
   expect(errors).toEqual([]);
 });
@@ -107,24 +117,52 @@ test('board games roll and property decisions advance a turn', async ({ page }) 
   await page.getByRole('button', { name: 'End turn →', exact: true }).click();
   await expect(page.getByRole('status').filter({ hasText: /Blue plays next/ })).toBeVisible();
 });
-test('first-person shooter fires, reloads, and supports pause', async ({ page }, info) => {
+test('3D tactical shooter buys, fires, reloads and synchronizes pause', async ({ page }, info) => {
+  test.setTimeout(90000);
+  await usePinnedThree(page);
+  await seedGame(page, 19);
   await page.goto('/games/strike-zone');
-  await page.getByRole('button', { name: 'Enter arena', exact: true }).click();
-  const view = page.getByRole('img', { name: /Strike Zone first-person/ });
-  await page.getByRole('button', { name: 'Fire', exact: true }).click();
-  await expect(view).toHaveAttribute('aria-label', /Ammo 11 of 12/);
-  await page.getByRole('button', { name: 'Reload', exact: true }).click();
-  await expect(view).toHaveAttribute('aria-label', /Reloading/);
-  await expect(view).toHaveAttribute('aria-label', /Ammo 12 of 12/);
-  await view.focus();
-  await view.press('Space');
-  await expect(view).toHaveAttribute('aria-label', /Ammo 11 of 12/);
+  await page.locator('iframe').scrollIntoViewIfNeeded();
+  const frame = page.frameLocator('iframe[title="Strike Zone 3D tactical shooter"]');
+  await expect(frame.locator('#menu-status')).toContainText('Arena ready', { timeout: 30000 });
+  await frame.locator('#difficulty').selectOption('Easy');
+  await frame.locator('#touch-setting').check();
+  await frame.locator('#play').click();
+  const snapshot = await frame
+    .locator('body')
+    .evaluate(() => (window as any).StrikeZone.snapshot());
+  expect(snapshot.actors.filter((a: any) => a.side === 'CT')).toHaveLength(5);
+  expect(snapshot.actors).toHaveLength(10);
+  await frame.locator('#view').press('KeyB');
+  await frame.locator('#view').press('Digit6');
+  await frame.locator('#view').press('Digit1');
+  await expect(frame.locator('#buy-money')).toHaveText('$150');
+  await frame.locator('#view').press('KeyB');
   await page.getByRole('button', { name: 'Pause game', exact: true }).click();
-  const before = await view.getAttribute('aria-label');
+  await expect
+    .poll(() => frame.locator('body').evaluate(() => (window as any).StrikeZone.snapshot().paused))
+    .toBe(true);
+  const before = await frame.locator('#timer').textContent();
   await page.waitForTimeout(400);
-  expect(await view.getAttribute('aria-label')).toBe(before);
+  expect(await frame.locator('#timer').textContent()).toBe(before);
   await page.getByRole('button', { name: 'Keep playing', exact: true }).click();
-  await view.screenshot({ path: `test-results/${info.project.name}-strike-active.png` });
+  await page.locator('iframe').scrollIntoViewIfNeeded();
+  await expect
+    .poll(() => frame.locator('body').evaluate(() => (window as any).StrikeZone.snapshot().phase), {
+      timeout: 45000,
+    })
+    .toBe('active');
+  await frame.locator('#fire-button').click();
+  await expect(frame.locator('#ammo')).toHaveText('11 / 100');
+  await frame.locator('[data-action="reload"]').click();
+  await expect(frame.locator('#weapon-name')).toContainText('RELOADING');
+  await expect(frame.locator('#ammo')).toHaveText('12 / 99', { timeout: 10000 });
+  await frame.locator('#score-button').click();
+  await expect(frame.locator('#score-table tbody tr')).toHaveCount(10);
+  await frame.locator('#score-close').click();
+  await page
+    .locator('iframe')
+    .screenshot({ path: `test-results/${info.project.name}-strike-active.png` });
 });
 test('reduced motion disables decorative animations', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });

@@ -35,7 +35,7 @@ $env:PLAYROOM_TEST_ORIGIN = 'http://localhost:3001'
 npm.cmd run test:browser -- --workers=1
 ```
 
-There is no external image or font dependency. All artwork is rendered from local SVG, CSS, and Canvas. App icons are checked in.
+There is no external image, font, or audio asset dependency. Artwork uses SVG, CSS, Canvas, and procedural WebGL geometry. Strike Zone loads integrity-pinned Three.js r128 from cdnjs and therefore needs an internet connection for its 3D library. App icons are checked in.
 
 ## Supabase setup
 
@@ -114,13 +114,17 @@ The runtime does not need a direct Postgres connection. Supabase is accessed thr
 
 ## Games and score validation
 
-The five new games below run locally for both guests and signed-in players, without database setup or Premium. Completed rounds save their best score in browser local storage; they do not submit ranked scores. Ludo and Property Club offer a computer opponent or two players on the same device. Property Club is a simplified Monopoly-style game without auctions, mortgages, houses, or online rooms.
+The five new games below run locally for both guests and signed-in players, without database setup or Premium. Metro Rush, Sunset Circuit, Ludo and Property Club save completed-round best scores in browser local storage. Strike Zone keeps settings and match data in memory and does not write scores to storage. None of these five games submit ranked scores. Ludo and Property Club offer a computer opponent or two players on the same device. Property Club is a simplified Monopoly-style game without auctions, mortgages, houses, or online rooms.
 
 - **Metro Rush:** a forward-facing, three-lane runner. Arrows/WASD switch lanes, jump, and slide. Space jumps. Swipe on the track or use touch buttons. Dodge trains, clear barriers and gates, and collect coins as speed increases.
 - **Sunset Circuit:** a perspective highway race over 3 km. Hold arrows/WASD or touch controls to steer, accelerate, and brake. Traffic collisions cost a life; the shoulder slows the car. Three crashes end the race.
 - **Ludo Lounge:** two colors with four tokens each, a 52-square track, safe squares, captures, extra rolls on sixes/captures, and exact rolls to finish. Roll and select a highlighted token. Bring all four home to win.
 - **Property Club:** a 24-square property board. Roll, buy or pass, collect rent, double rent by completing color groups, and pass GO for $200. Includes chance cards, tax, and jail. Bankruptcy or 24 turns ends the game, with property value included in net worth.
-- **Strike Zone:** a basic raycast first-person arena with three bot waves, cover, pathfinding, health, a 12-round magazine, and reloading. WASD moves, arrows or view dragging turns, click/Space fires, and R reloads. Touch controls support phones.
+- **Strike Zone — Dustline:** a Three.js 3D, 5v5 tactical bomb-defusal game. Includes T/CT selection, three bot difficulties, 15-second freeze/buy phases, 1:55 rounds, 3-second planting, 40-second bomb fuses, 10-second defusing (5 with a kit), no mid-round respawns, teammate spectating, MR15 halftime, first to 16, and a 15–15 draw at 30 rounds. Loadouts cover knife, USP/Glock, Deagle, MP5, AK/M4, AWP, shotgun, armor, helmet, kit, HE, flash, and smoke. Includes recoil/spread, hit regions, cover penetration, scoped aiming, finite ammo/reloading, acceleration/friction/jumping/crouching, ramps/stairs/fall damage, waypoint A* bots, hearing/vision, radar, kill feed, scoreboard, procedural audio, and pooled visual effects. WASD moves; mouse/pointer lock or drag aims; click fires; R reloads; E interacts; B buys; Ctrl crouches; Shift walks; Tab scores; Esc pauses. Touch controls and basic rebinding are available in the menu.
+
+The complete standalone shooter is `public/strike-zone/index.html`, served at `/strike-zone/index.html` and embedded at `/games/strike-zone`. It contains all CSS, game code, procedural textures/models, and synthesized audio in one file, with the requested external Three.js r128 script. Its simulation runs at 128 Hz with interpolated rendering; 60 FPS is a target dependent on GPU/device performance. The website bridge validates message source/origin and synchronizes external pause/restart. Only the shooter HTML allows same-origin framing and the pinned CDN script; other pages retain their framing restrictions. `tests/tactical-shooter.test.ts` executes the actual simulation extracted from this HTML, rather than a separate duplicate engine.
+
+Browser tests intercept the cdnjs request with the exact integrity-verified r128 bytes in `tests/fixtures/three-r128.min.js`, with its MIT license alongside it, so CDN availability does not affect UI checks. The standalone game itself still uses the requested CDN URL.
 
 All pages have entrance transitions, off-screen scroll reveals, interactive hover/press feedback, and animated game artwork. Dialogs, dice, and selectable Ludo tokens animate. Decorative animations respect `prefers-reduced-motion`; gameplay remains responsive to controls.
 

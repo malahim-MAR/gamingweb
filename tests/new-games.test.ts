@@ -15,12 +15,11 @@ import {
   rollProperty,
   buyProperty,
   endPropertyTurn,
-  rentFor,
   netWorth,
+  rentFor,
   SQUARES,
   squareCell,
 } from '@/games/monopoly/engine';
-import { createStrike, stepStrike, fire, raycast, wallAt, route } from '@/games/strike-zone/engine';
 const input = (commands: string[] = [], held: string[] = []) => ({ commands, held: new Set(held) });
 describe('Metro Rush', () => {
   it('keeps lane switches within the three lanes', () => {
@@ -188,58 +187,5 @@ describe('Property Club economy', () => {
     s.owners[23] = 1;
     expect(netWorth(s, 1)).toBe(1420);
     expect(endPropertyTurn(s).winner).toBe(1);
-  });
-});
-describe('Strike Zone arena', () => {
-  it('casts rays to walls and finds routes around obstacles', () => {
-    expect(raycast(2.5, 2.5, 0).distance).toBeCloseTo(12.5);
-    expect(raycast(2.5, 2.5, Math.PI).distance).toBeCloseTo(1.5);
-    const path = route(2.5, 3.5, 6.5, 3.5);
-    expect(path.length).toBeGreaterThan(4);
-    expect(path.every(([x, y]) => !wallAt(x, y))).toBe(true);
-  });
-  it('blocks movement through walls and normalizes diagonal speed', () => {
-    const s = createStrike(4);
-    s.x = 1.25;
-    s.angle = Math.PI;
-    stepStrike(s, 0.1, input([], ['KeyW']));
-    expect(s.x).toBeGreaterThanOrEqual(1.2);
-    const a = createStrike(4),
-      b = createStrike(4);
-    stepStrike(a, 0.1, input([], ['KeyW']));
-    stepStrike(b, 0.1, input([], ['KeyW', 'KeyD']));
-    expect(Math.hypot(a.x - 2.5, a.y - 2.5)).toBeCloseTo(Math.hypot(b.x - 2.5, b.y - 2.5));
-  });
-  it('hits visible bots, blocks shots through cover, and respects cooldown', () => {
-    const s = createStrike(4);
-    s.bots = [{ x: 5.5, y: 2.5, hp: 70, attack: 10, path: [], repath: 1, hit: 0 }];
-    expect(fire(s)).toBe(true);
-    expect(s.bots[0].hp).toBe(35);
-    expect(s.ammo).toBe(11);
-    expect(fire(s)).toBe(false);
-    s.cooldown = 0;
-    fire(s);
-    expect(s.kills).toBe(1);
-    s.cooldown = 0;
-    s.y = 3.5;
-    s.bots = [{ x: 7.5, y: 3.5, hp: 70, attack: 10, path: [], repath: 1, hit: 0 }];
-    fire(s);
-    expect(s.bots[0].hp).toBe(70);
-  });
-  it('prevents firing with an empty magazine, reloads, and advances waves', () => {
-    const s = createStrike(4);
-    s.ammo = 0;
-    expect(fire(s)).toBe(false);
-    stepStrike(s, 0.1, input(['KeyR']));
-    expect(s.reload).toBeGreaterThan(0);
-    stepStrike(s, 1.3, input());
-    expect(s.ammo).toBe(12);
-    s.bots = [];
-    stepStrike(s, 1.6, input());
-    expect(s.wave).toBe(2);
-    expect(s.bots).toHaveLength(3);
-    s.wave = 3;
-    s.bots = [];
-    expect(stepStrike(s, 1.6, input()).end).toBe(true);
   });
 });

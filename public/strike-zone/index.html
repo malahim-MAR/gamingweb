@@ -1,0 +1,4146 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+    <title>Strike Zone — Dustline</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2317252c'/%3E%3Cpath d='M20 4L8 19h8l-4 10 13-16h-8z' fill='%23e3bd77'/%3E%3C/svg%3E"
+    />
+    <style>
+      :root {
+        color-scheme: dark;
+        --gold: #e3bd77;
+        --ct: #93c9db;
+        --t: #e4b26b;
+        --ink: #131c20;
+        --green: #a9d577;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: #141e24;
+        color: #f3eada;
+        font:
+          14px system-ui,
+          sans-serif;
+        overflow: hidden;
+      }
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+      button,
+      select,
+      input {
+        accent-color: var(--gold);
+      }
+      button {
+        cursor: pointer;
+        border: 1px solid #ffffff25;
+        background: #ffffff0b;
+        color: inherit;
+        border-radius: 7px;
+        padding: 10px 14px;
+        transition:
+          background 0.18s,
+          transform 0.18s;
+      }
+      button:hover {
+        background: #ffffff20;
+      }
+      button:active {
+        transform: scale(0.97);
+      }
+      button:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+      button:focus-visible,
+      input:focus-visible,
+      select:focus-visible,
+      summary:focus-visible {
+        outline: 2px solid var(--gold);
+        outline-offset: 3px;
+      }
+      [hidden] {
+        display: none !important;
+      }
+      .primary {
+        background: var(--gold);
+        color: #182127;
+        border-color: var(--gold);
+        font-weight: 800;
+      }
+      .primary:hover {
+        background: #f1d199;
+      }
+      .muted {
+        color: #bbc1bc;
+      }
+      .eyebrow {
+        font-size: 10px;
+        letter-spacing: 3px;
+        font-weight: 800;
+        color: var(--gold);
+      }
+      h1,
+      h2,
+      p {
+        margin: 0;
+      }
+      #view {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        display: block;
+        touch-action: none;
+        outline: none;
+      }
+      #hud {
+        pointer-events: none;
+        position: fixed;
+        inset: 0;
+        font-variant-numeric: tabular-nums;
+      }
+      .panel {
+        background: #101a20d9;
+        border: 1px solid #ffffff15;
+        border-radius: 8px;
+        backdrop-filter: blur(8px);
+      }
+      #top-center {
+        position: absolute;
+        top: 16px;
+        left: 50%;
+        transform: translateX(-50%);
+        text-align: center;
+        min-width: 205px;
+        padding: 9px 16px;
+      }
+      #scores {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        font-size: 23px;
+        font-weight: 900;
+      }
+      #scores small {
+        font-size: 10px;
+        font-weight: 700;
+      }
+      #timer {
+        font-size: 22px;
+        color: #fff3d4;
+      }
+      #phase {
+        font-size: 9px;
+        letter-spacing: 1.5px;
+        margin-top: 4px;
+        color: var(--gold);
+      }
+      #radar-box {
+        position: absolute;
+        left: 16px;
+        top: 16px;
+        padding: 6px;
+        width: 132px;
+      }
+      #radar {
+        display: block;
+        width: 118px;
+        height: 118px;
+      }
+      #money {
+        font-size: 17px;
+        font-weight: 800;
+        color: var(--green);
+        padding: 3px 5px;
+      }
+      #location {
+        position: absolute;
+        top: 166px;
+        left: 18px;
+        font-size: 10px;
+        color: #edd6af;
+      }
+      #kill-feed {
+        position: absolute;
+        right: 16px;
+        top: 16px;
+        display: grid;
+        gap: 5px;
+        max-width: 300px;
+        font-size: 11px;
+      }
+      .kill {
+        padding: 7px 9px;
+        background: #102028d9;
+        border-right: 2px solid var(--gold);
+        border-radius: 3px;
+      }
+      .stats {
+        position: absolute;
+        bottom: 22px;
+        padding: 12px 16px;
+        font-size: 25px;
+        font-weight: 850;
+        display: flex;
+        gap: 18px;
+        align-items: center;
+      }
+      .stats small {
+        display: block;
+        font-size: 9px;
+        letter-spacing: 2px;
+        color: #adb6b5;
+      }
+      .health {
+        left: 18px;
+      }
+      .ammo {
+        right: 18px;
+        text-align: right;
+      }
+      #weapon-name {
+        font-size: 10px;
+        letter-spacing: 2px;
+        color: var(--gold);
+        margin-bottom: 3px;
+      }
+      #crosshair {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 2px;
+        height: 2px;
+        --gap: 7px;
+      }
+      #crosshair i {
+        position: absolute;
+        background: var(--green);
+        box-shadow: 0 0 2px #0008;
+      }
+      #crosshair i:nth-child(1) {
+        width: 9px;
+        height: 2px;
+        right: var(--gap);
+        top: 0;
+      }
+      #crosshair i:nth-child(2) {
+        width: 9px;
+        height: 2px;
+        left: var(--gap);
+        top: 0;
+      }
+      #crosshair i:nth-child(3) {
+        height: 9px;
+        width: 2px;
+        bottom: var(--gap);
+        left: 0;
+      }
+      #crosshair i:nth-child(4) {
+        height: 9px;
+        width: 2px;
+        top: var(--gap);
+        left: 0;
+      }
+      #hitmarker {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        font-size: 26px;
+        transform: translate(-50%, -50%);
+        color: #fff;
+        opacity: 0;
+      }
+      #scope {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at center, transparent 0, transparent 29%, #030608 30%);
+        display: none;
+      }
+      #scope:before,
+      #scope:after {
+        content: '';
+        position: absolute;
+        background: #080b0b;
+      }
+      #scope:before {
+        left: 50%;
+        top: 0;
+        height: 100%;
+        width: 1px;
+      }
+      #scope:after {
+        top: 50%;
+        left: 0;
+        width: 100%;
+        height: 1px;
+      }
+      #damage-wash,
+      #flash-wash {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0;
+      }
+      #damage-wash {
+        background: radial-gradient(transparent 20%, #aa241d90);
+      }
+      #flash-wash {
+        background: white;
+        z-index: 7;
+      }
+      #damage-direction {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        height: 110px;
+        width: 110px;
+        margin: -55px;
+        border-top: 5px solid #e58164;
+        border-radius: 50%;
+        opacity: 0;
+      }
+      #objective {
+        position: absolute;
+        left: 50%;
+        bottom: 91px;
+        transform: translateX(-50%);
+        text-align: center;
+        max-width: 80%;
+        min-width: 200px;
+        font-size: 11px;
+      }
+      #progress {
+        height: 5px;
+        background: #ffffff25;
+        border-radius: 3px;
+        margin-top: 7px;
+        overflow: hidden;
+      }
+      #progress-fill {
+        height: 100%;
+        width: 0;
+        background: var(--gold);
+      }
+      #announcement {
+        position: absolute;
+        left: 50%;
+        top: 32%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        text-shadow: 0 2px 8px #000;
+        font-size: 25px;
+        font-weight: 800;
+        color: #fff0ca;
+        width: 85%;
+      }
+      #spectate {
+        position: absolute;
+        left: 50%;
+        bottom: 145px;
+        transform: translateX(-50%);
+        text-align: center;
+        font-size: 11px;
+        color: var(--ct);
+      }
+      .overlay {
+        position: fixed;
+        inset: 0;
+        background: #0f1b22c9;
+        backdrop-filter: blur(7px);
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        overflow: auto;
+      }
+      .menu-card {
+        width: 560px;
+        max-width: 100%;
+        background: linear-gradient(130deg, #1d2b31f7, #112026f7);
+        border: 1px solid #adbaa52b;
+        border-radius: 15px;
+        padding: 28px;
+        box-shadow: 0 20px 70px #0005;
+      }
+      .brand {
+        font-size: clamp(34px, 7vw, 60px);
+        font-weight: 950;
+        letter-spacing: -3px;
+        line-height: 0.95;
+        margin: 10px 0 14px;
+      }
+      .brand span {
+        color: var(--gold);
+      }
+      .sub {
+        font-size: 12px;
+        line-height: 1.8;
+        color: #c1c6be;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 13px;
+        margin: 20px 0;
+      }
+      .grid label {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-size: 10px;
+        letter-spacing: 0.4px;
+        color: #d2d5cb;
+      }
+      .grid select {
+        width: 100%;
+        border: 1px solid #ffffff22;
+        background: #17272e;
+        color: #f3eada;
+        padding: 9px;
+        border-radius: 6px;
+      }
+      .grid input {
+        width: 100%;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      .menu-card details {
+        margin: 12px 0;
+        color: #c1c6be;
+        font-size: 11px;
+        line-height: 1.8;
+      }
+      .menu-card summary {
+        cursor: pointer;
+        color: var(--gold);
+      }
+      .actions {
+        display: flex;
+        gap: 9px;
+        margin-top: 16px;
+      }
+      .actions button {
+        flex: 1;
+      }
+      #menu-status {
+        font-size: 11px;
+        color: var(--gold);
+        min-height: 16px;
+        margin-top: 8px;
+      }
+      #buy-card {
+        width: 530px;
+        max-width: 100%;
+        padding: 24px;
+      }
+      .buy-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 14px;
+      }
+      .buy-header h2 {
+        font-size: 23px;
+      }
+      #buy-items {
+        display: grid;
+        gap: 6px;
+      }
+      #buy-items button {
+        display: flex;
+        justify-content: space-between;
+        text-align: left;
+        font-size: 12px;
+      }
+      #buy-items small {
+        color: #b7c4b4;
+      }
+      #buy-note {
+        font-size: 11px;
+        color: var(--gold);
+        min-height: 25px;
+        margin-top: 12px;
+      }
+      #scoreboard .menu-card {
+        width: 720px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+        margin-top: 15px;
+      }
+      th {
+        text-align: left;
+        color: var(--gold);
+        font-size: 10px;
+      }
+      td,
+      th {
+        padding: 7px;
+        border-bottom: 1px solid #ffffff13;
+      }
+      tr.dead {
+        opacity: 0.5;
+      }
+      tr.me {
+        background: #ffffff0b;
+      }
+      #touch-controls {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 5;
+        touch-action: none;
+      }
+      #stick {
+        position: absolute;
+        left: 18px;
+        bottom: 22px;
+        width: 105px;
+        height: 105px;
+        border: 1px solid #fff5;
+        border-radius: 50%;
+        background: #10202970;
+        pointer-events: auto;
+        touch-action: none;
+      }
+      #stick-thumb {
+        position: absolute;
+        left: 34px;
+        top: 34px;
+        width: 35px;
+        height: 35px;
+        background: #ffffff35;
+        border: 1px solid #ffffff80;
+        border-radius: 50%;
+        pointer-events: none;
+      }
+      #touch-actions {
+        position: absolute;
+        right: 15px;
+        bottom: 19px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+        pointer-events: auto;
+      }
+      #touch-actions button {
+        font-size: 10px;
+        padding: 9px 8px;
+        min-width: 44px;
+        touch-action: none;
+        background: #13252dcc;
+      }
+      #fire-button {
+        grid-column: span 2;
+        color: var(--gold);
+        font-weight: 900;
+      }
+      #utility-bar {
+        position: fixed;
+        right: 12px;
+        bottom: 90px;
+        display: flex;
+        gap: 5px;
+        z-index: 6;
+      }
+      #utility-bar button {
+        font-size: 9px;
+        padding: 6px 8px;
+        background: #14262cba;
+      }
+      body.mobile .stats {
+        bottom: 141px;
+        padding: 8px 11px;
+        font-size: 20px;
+      }
+      body.mobile #objective {
+        bottom: 198px;
+        min-width: 165px;
+        font-size: 10px;
+      }
+      body.mobile #spectate {
+        bottom: 235px;
+      }
+      body.mobile #utility-bar {
+        bottom: auto;
+        top: 174px;
+      }
+      body.mobile #top-center {
+        top: 12px;
+        min-width: 155px;
+        padding: 7px 10px;
+        left: 58%;
+      }
+      body.mobile #scores {
+        font-size: 18px;
+        gap: 9px;
+      }
+      body.mobile #timer {
+        font-size: 18px;
+      }
+      body.mobile #radar-box {
+        left: 9px;
+        top: 12px;
+        width: 96px;
+      }
+      body.mobile #radar {
+        width: 82px;
+        height: 82px;
+      }
+      body.mobile #money {
+        font-size: 13px;
+      }
+      body.mobile #location {
+        top: 133px;
+        left: 11px;
+      }
+      body.mobile #kill-feed {
+        top: 87px;
+        right: 10px;
+        max-width: 170px;
+        font-size: 9px;
+      }
+      body.mobile #announcement {
+        font-size: 20px;
+        top: 36%;
+      }
+      body.mobile .menu-card {
+        padding: 19px;
+      }
+      body.mobile .grid {
+        gap: 9px;
+        margin: 15px 0;
+      }
+      body.mobile .overlay {
+        padding: 14px;
+      }
+      body.mobile table {
+        font-size: 9px;
+      }
+      body.mobile td,
+      body.mobile th {
+        padding: 5px 3px;
+      }
+      body.mobile #scoreboard .menu-card {
+        padding: 12px;
+      }
+      #loading {
+        z-index: 20;
+        background: #15242b;
+      }
+      #fatal {
+        color: #f0c38f;
+        line-height: 1.8;
+      }
+      kbd {
+        font: inherit;
+        color: var(--gold);
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          transition: none !important;
+        }
+      }
+    </style>
+    <style>
+      @media (max-width: 420px) {
+        body.mobile #stick {
+          width: 82px;
+          height: 82px;
+          left: 10px;
+        }
+        body.mobile #stick-thumb {
+          width: 32px;
+          height: 32px;
+          left: 24px;
+          top: 24px;
+        }
+        body.mobile #touch-actions {
+          right: 8px;
+          gap: 5px;
+        }
+        body.mobile #touch-actions button {
+          font-size: 8px;
+          min-width: 38px;
+          padding: 9px 6px;
+        }
+        body.mobile #top-center {
+          left: auto;
+          right: 8px;
+          transform: none;
+          min-width: 125px;
+        }
+        body.mobile #scores {
+          font-size: 16px;
+          gap: 7px;
+        }
+      }
+      @media (max-width: 300px) {
+        body.mobile #stick {
+          width: 62px;
+          height: 62px;
+          left: 8px;
+        }
+        body.mobile #stick-thumb {
+          width: 26px;
+          height: 26px;
+          left: 18px;
+          top: 18px;
+        }
+        body.mobile #radar-box {
+          width: 81px;
+        }
+        body.mobile #radar {
+          width: 67px;
+          height: 67px;
+        }
+        body.mobile #touch-actions button {
+          font-size: 7px;
+          padding: 9px 4px;
+        }
+        body.mobile #kill-feed {
+          max-width: 135px;
+        }
+      }
+      #objective {
+        background: #102028de;
+        border: 1px solid #ffffff22;
+        border-radius: 7px;
+        padding: 8px 12px;
+      }
+      #spectate {
+        text-shadow: 0 1px 5px #000;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas
+      id="view"
+      tabindex="0"
+      role="application"
+      aria-label="Strike Zone 3D tactical shooter. WASD moves, mouse or drag aims, left click fires, E interacts, B buys."
+    ></canvas>
+    <div id="hud" hidden>
+      <div id="radar-box" class="panel">
+        <canvas id="radar" width="236" height="236" aria-label="Team radar"></canvas>
+        <div id="money">$800</div>
+      </div>
+      <div id="location">T SPAWN</div>
+      <div id="top-center" class="panel">
+        <div id="scores">
+          <span style="color: var(--ct)"><small>CT</small> <b id="ct-score">0</b></span
+          ><span id="timer">0:15</span
+          ><span style="color: var(--t)"><b id="t-score">0</b> <small>T</small></span>
+        </div>
+        <div id="phase">BUY PHASE · ROUND 1 / 30</div>
+      </div>
+      <div id="kill-feed"></div>
+      <div id="scope"></div>
+      <div id="crosshair"><i></i><i></i><i></i><i></i></div>
+      <div id="hitmarker">×</div>
+      <div id="damage-direction"></div>
+      <div class="stats health panel">
+        <span><small>HEALTH</small><b id="health">100</b></span
+        ><span><small>ARMOR</small><b id="armor">0</b></span>
+      </div>
+      <div class="stats ammo panel">
+        <span
+          ><div id="weapon-name">USP</div>
+          <b id="ammo">12 / 100</b></span
+        >
+      </div>
+      <div id="objective">
+        <span id="objective-text">Defend sites A and B.</span>
+        <div id="progress" hidden><div id="progress-fill"></div></div>
+      </div>
+      <div id="announcement" role="status" aria-live="polite"></div>
+      <div id="spectate" hidden></div>
+    </div>
+    <div id="damage-wash"></div>
+    <div id="flash-wash"></div>
+    <div id="utility-bar" hidden>
+      <button id="buy-button" aria-label="Open buy menu">B · BUY</button
+      ><button id="score-button" aria-label="Toggle scoreboard">TAB · SCORE</button
+      ><button id="pause-button" aria-label="Pause match">PAUSE</button
+      ><button id="fullscreen-button" aria-label="Fullscreen shooter">⛶</button>
+    </div>
+    <div id="touch-controls" hidden>
+      <div id="stick" role="application" aria-label="Movement joystick">
+        <div id="stick-thumb"></div>
+      </div>
+      <div id="touch-actions">
+        <button data-action="jump">JUMP</button><button data-action="crouch">DUCK</button
+        ><button data-action="use">USE E</button
+        ><button id="fire-button" data-action="fire">FIRE</button
+        ><button data-action="reload">RELOAD</button><button data-action="weapon">WEAPON</button
+        ><button data-action="scope">SCOPE</button><button data-action="grenade">GRENADE</button>
+      </div>
+    </div>
+    <div id="main-menu" class="overlay">
+      <div class="menu-card">
+        <p class="eyebrow">PLAYROOM ORIGINAL · TACTICAL FPS</p>
+        <h1 class="brand">STRIKE<span>ZONE.</span></h1>
+        <p class="sub">
+          DUSTLINE · 5 versus 5 · Bomb defusal<br />Two sites. One team. Make your round count.
+        </p>
+        <div class="grid">
+          <label
+            >Your side<select id="side">
+              <option value="CT">Counter-Terrorists</option>
+              <option value="T">Terrorists</option>
+              <option value="random">Random</option>
+            </select></label
+          ><label
+            >Bot difficulty<select id="difficulty">
+              <option>Easy</option>
+              <option selected>Normal</option>
+              <option>Hard</option>
+            </select></label
+          ><label
+            >Mouse sensitivity <span id="sensitivity-value">1.0</span
+            ><input id="sensitivity" type="range" min="0.3" max="2.5" step="0.1" value="1" /></label
+          ><label
+            >Field of view <span id="fov-value">90°</span
+            ><input id="fov" type="range" min="70" max="110" step="1" value="90" /></label
+          ><label
+            >Volume<input
+              id="volume"
+              type="range"
+              min="0"
+              max="1"
+              step="0.05"
+              value="0.45" /></label
+          ><label class="row" style="flex-direction: row"
+            >Touch controls<input id="touch-setting" type="checkbox" style="width: auto"
+          /></label>
+        </div>
+        <details>
+          <summary>Controls & key bindings</summary>
+          <p>
+            WASD move · Mouse / drag aim · Click fire · R reload · Space jump · Ctrl crouch · Shift
+            walk · Right click scope · 1–5 weapons · G drop bomb · E hold to plant / defuse · B buy
+            · Tab scoreboard · Esc pause.
+          </p>
+          <div class="grid">
+            <label
+              >Reload<select id="bind-reload">
+                <option value="KeyR">R</option>
+                <option value="KeyX">X</option>
+                <option value="KeyC">C</option>
+              </select></label
+            ><label
+              >Interact<select id="bind-use">
+                <option value="KeyE">E</option>
+                <option value="KeyF">F</option>
+                <option value="KeyV">V</option>
+              </select></label
+            ><label
+              >Buy<select id="bind-buy">
+                <option value="KeyB">B</option>
+                <option value="KeyV">V</option>
+                <option value="KeyX">X</option>
+              </select></label
+            ><label
+              >Jump<select id="bind-jump">
+                <option value="Space">Space</option>
+                <option value="KeyV">V</option>
+                <option value="KeyC">C</option>
+              </select></label
+            >
+          </div>
+        </details>
+        <p class="sub">
+          MR15 · First to 16 · Halftime after 15 · 15–15 is a draw.<br />Player + 4 allied bots
+          against 5 opponents. Settings stay in memory.
+        </p>
+        <div class="actions"><button id="play" class="primary">Play match →</button></div>
+        <p id="menu-status" role="status">Loading the 3D arena…</p>
+      </div>
+    </div>
+    <div id="buy-menu" class="overlay" hidden>
+      <div id="buy-card" class="menu-card">
+        <div class="buy-header">
+          <div>
+            <p class="eyebrow">EQUIP FOR THE ROUND</p>
+            <h2 id="buy-title">Buy menu</h2>
+          </div>
+          <span id="buy-money" style="color: var(--green)">$800</span>
+        </div>
+        <div id="buy-items"></div>
+        <p id="buy-note" role="status"></p>
+        <p class="sub">
+          Number keys select · 0 goes back · B closes · Buying ends with the freeze timer.
+        </p>
+        <div class="actions">
+          <button id="buy-back">0 · Back</button
+          ><button id="buy-close" class="primary">Return to match</button>
+        </div>
+      </div>
+    </div>
+    <div id="pause-menu" class="overlay" hidden>
+      <div class="menu-card">
+        <p class="eyebrow">TAKE A BREATHER</p>
+        <h2 style="font-size: 32px; margin: 10px 0">Match paused.</h2>
+        <p id="pause-detail" class="sub">Your team will be here when you return.</p>
+        <div class="actions">
+          <button id="resume" class="primary">Resume match</button
+          ><button id="return-menu">Main menu</button>
+        </div>
+      </div>
+    </div>
+    <div id="scoreboard" class="overlay" hidden>
+      <div class="menu-card">
+        <p class="eyebrow">DUSTLINE · LOCAL MATCH</p>
+        <h2>Round scoreboard</h2>
+        <div id="score-table"></div>
+        <p class="sub" style="margin-top: 10px">
+          All opponents are local bots. Ping values are simulated.
+        </p>
+        <button id="score-close" style="margin-top: 12px">Close scoreboard</button>
+      </div>
+    </div>
+    <div id="match-end" class="overlay" hidden>
+      <div class="menu-card">
+        <p class="eyebrow">MATCH COMPLETE</p>
+        <h2 id="match-result" style="font-size: 36px; margin: 12px 0"></h2>
+        <p id="match-summary" class="sub"></p>
+        <div id="final-table"></div>
+        <div class="actions">
+          <button id="play-again" class="primary">Play again</button
+          ><button id="end-menu">Main menu</button>
+        </div>
+      </div>
+    </div>
+    <div id="loading" class="overlay">
+      <div class="menu-card">
+        <p class="eyebrow">STRIKE ZONE · DUSTLINE</p>
+        <h2 style="margin: 15px 0">Building the arena.</h2>
+        <p id="fatal" role="status">Loading Three.js and procedural geometry…</p>
+        <button id="retry" hidden style="margin-top: 15px" onclick="location.reload()">
+          Retry loading
+        </button>
+      </div>
+    </div>
+    <script id="game-core">
+      // Config, Physics, Weapons, Bots and GameState: pure simulation, independent of rendering.
+      window.StrikeCore = (() => {
+        'use strict';
+        const DT = 1 / 128,
+          clamp = (v, a, b) => Math.max(a, Math.min(b, v)),
+          vec = (x = 0, y = 0, z = 0) => ({ x, y, z }),
+          copy = (p) => vec(p.x, p.y, p.z),
+          distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z),
+          horizontal = (a, b) => Math.hypot(a.x - b.x, a.z - b.z),
+          normal = (p) => {
+            const l = Math.hypot(p.x, p.y, p.z) || 1;
+            return vec(p.x / l, p.y / l, p.z / l);
+          };
+        const pattern = (strength, n = 24) =>
+          Array.from({ length: n }, (_, i) => [
+            strength * (i < 9 ? 1 : 0.5),
+            strength * Math.sin((i - 7) * 0.6) * (i < 7 ? 0.12 : 0.65),
+          ]);
+        const gun = (
+          name,
+          slot,
+          price,
+          damage,
+          rate,
+          mag,
+          reserve,
+          reload,
+          speed,
+          penetration,
+          recoil,
+          extra = {},
+        ) => ({
+          name,
+          slot,
+          price,
+          damage,
+          rate,
+          mag,
+          reserve,
+          reload,
+          speed,
+          penetration,
+          head: 4,
+          reward: slot === 'smg' ? 600 : slot === 'knife' ? 1500 : 300,
+          spread: { stand: 0.007, move: 0.035, crouch: 0.003, jump: 0.075 },
+          recoil: pattern(recoil),
+          automatic: false,
+          ...extra,
+        });
+        const WEAPONS = {
+          knife: gun('Knife', 'knife', 0, 50, 0.45, 0, 0, 0, 1, 1, 0, { range: 2.2, head: 4 }),
+          usp: gun('USP', 'pistol', 200, 34, 0.18, 12, 100, 2.2, 1, 0.5, 0.013, { side: 'CT' }),
+          glock: gun('Glock', 'pistol', 400, 25, 0.15, 20, 120, 2, 1, 0.48, 0.01, { side: 'T' }),
+          deagle: gun('Desert Eagle', 'pistol', 650, 54, 0.27, 7, 35, 2.2, 0.97, 0.75, 0.028),
+          mp5: gun('MP5', 'smg', 1500, 26, 0.075, 30, 120, 2.6, 0.97, 0.55, 0.012, {
+            automatic: true,
+          }),
+          ak47: gun('AK-47', 'rifle', 2700, 36, 0.1, 30, 90, 2.5, 0.88, 0.78, 0.023, {
+            automatic: true,
+            side: 'T',
+          }),
+          m4a1: gun('M4A1', 'rifle', 3100, 32, 0.09, 30, 90, 3, 0.9, 0.77, 0.018, {
+            automatic: true,
+            side: 'CT',
+          }),
+          awp: gun('AWP', 'sniper', 4750, 120, 1.25, 10, 30, 3.5, 0.76, 1, 0.065, {
+            scope: true,
+            spread: { stand: 0.12, move: 0.18, crouch: 0.08, jump: 0.28 },
+          }),
+          shotgun: gun('Shotgun', 'shotgun', 1700, 15, 0.85, 8, 32, 3, 0.92, 0.35, 0.045, {
+            pellets: 8,
+            spread: { stand: 0.055, move: 0.08, crouch: 0.045, jump: 0.13 },
+          }),
+        };
+        const UTILITY = {
+          kevlar: { name: 'Kevlar', price: 650 },
+          helmet: { name: 'Kevlar + helmet', price: 1000 },
+          kit: { name: 'Defuse kit', price: 400, side: 'CT' },
+          he: { name: 'HE grenade', price: 300 },
+          flash: { name: 'Flashbang', price: 200 },
+          smoke: { name: 'Smoke grenade', price: 300 },
+        };
+        const DIFFICULTY = {
+          Easy: { reaction: 0.52, error: 0.06, vision: 1.05, head: 0.04, speed: 0.88 },
+          Normal: { reaction: 0.28, error: 0.025, vision: 1.35, head: 0.12, speed: 1 },
+          Hard: { reaction: 0.15, error: 0.01, vision: 1.6, head: 0.26, speed: 1.05 },
+        };
+        const SITES = [
+          { name: 'A', x: 28, z: -27, w: 15, d: 14 },
+          { name: 'B', x: -30, z: -27, w: 15, d: 15 },
+        ];
+        function map() {
+          const boxes = [];
+          const add = (x, y, z, w, h, d, material = 'sand', penetrable = false) =>
+            boxes.push({ x, y, z, w, h, d, material, penetrable });
+          add(-45, 5, 0, 2, 10, 88);
+          add(45, 5, 0, 2, 10, 88);
+          add(0, 5, -44, 92, 10, 2);
+          add(0, 5, 44, 92, 10, 2);
+          add(-16, 4, 12, 6, 8, 20, 'brick');
+          add(16, 4, 13, 6, 8, 22, 'brick');
+          add(-16, 4, -16, 5, 8, 19);
+          add(16, 4, -14, 5, 8, 15);
+          add(-29, 4, 23, 18, 8, 2);
+          add(29, 4, 23, 18, 8, 2);
+          add(0, 4, -23, 14, 8, 3);
+          add(-39, 3, 3, 2, 6, 24);
+          add(-23, 3, 3, 2, 6, 24);
+          add(-31, 6, 3, 18, 1, 24, 'brick');
+          add(39, 4, 0, 2, 8, 32);
+          add(-5, 2, -6, 4, 4, 0.3, 'metal', true);
+          add(5, 2, -6, 4, 4, 0.3, 'metal', true);
+          const crates = [
+            [5, 20, 2.4, 2.4],
+            [-6, 29, 2.5, 1.8],
+            [-31, 17, 3, 2.2],
+            [31, 15, 2.6, 2.6],
+            [-33, -27, 3, 2.6],
+            [-27, -23, 2, 1.6],
+            [-28, -34, 2.4, 2.4],
+            [31, -29, 3, 2.5],
+            [25, -25, 2, 1.5],
+            [28, -33, 2.5, 2.8],
+            [7, -15, 2, 2],
+            [-6, 4, 2, 2],
+            [-33, -4, 2, 2],
+            [32, -3, 2.5, 1.8],
+          ];
+          for (const [x, z, w, h] of crates) {
+            const base = x > 17 && z < -18 ? 1.2 : 0;
+            add(x, base + h / 2, z, w, h, w, 'wood', true);
+          }
+          const surfaces = [{ x: 28, z: -27, w: 20, d: 18, y: 1.2 }];
+          for (let i = 0; i < 6; i++)
+            surfaces.push({ x: 19, z: -15 - i * 0.55, w: 3, d: 0.6, y: (i + 1) * 0.2 });
+          const ramps = [{ x: 28, z: -15, w: 5, d: 6, low: 0, high: 1.2 }];
+          return { boxes, surfaces, ramps };
+        }
+        function floorAt(world, x, z) {
+          let y = 0;
+          for (const s of world.surfaces)
+            if (Math.abs(x - s.x) <= s.w / 2 && Math.abs(z - s.z) <= s.d / 2) y = Math.max(y, s.y);
+          for (const r of world.ramps)
+            if (Math.abs(x - r.x) <= r.w / 2 && Math.abs(z - r.z) <= r.d / 2)
+              y = Math.max(y, r.low + ((r.high - r.low) * (r.z + r.d / 2 - z)) / r.d);
+          return y;
+        }
+        function bounds(b, pad = 0) {
+          return {
+            min: vec(b.x - b.w / 2 - pad, b.y - b.h / 2, b.z - b.d / 2 - pad),
+            max: vec(b.x + b.w / 2 + pad, b.y + b.h / 2, b.z + b.d / 2 + pad),
+          };
+        }
+        function rayBox(origin, dir, box) {
+          let near = -Infinity,
+            far = Infinity,
+            axis = 'x',
+            sign = 1;
+          for (const key of ['x', 'y', 'z']) {
+            if (Math.abs(dir[key]) < 1e-8) {
+              if (origin[key] < box.min[key] || origin[key] > box.max[key]) return null;
+              continue;
+            }
+            let a = (box.min[key] - origin[key]) / dir[key],
+              b = (box.max[key] - origin[key]) / dir[key],
+              s = -Math.sign(dir[key]);
+            if (a > b) {
+              [a, b] = [b, a];
+            }
+            if (a > near) {
+              near = a;
+              axis = key;
+              sign = s;
+            }
+            far = Math.min(far, b);
+            if (near > far || far < 0) return null;
+          }
+          const n = vec();
+          n[axis] = sign;
+          return { t: Math.max(0, near), exit: far, normal: n };
+        }
+        function direction(yaw, pitch = 0) {
+          return vec(
+            -Math.sin(yaw) * Math.cos(pitch),
+            Math.sin(pitch),
+            -Math.cos(yaw) * Math.cos(pitch),
+          );
+        }
+        function eye(a) {
+          return vec(a.pos.x, a.pos.y + (a.crouching ? 1.03 : 1.65), a.pos.z);
+        }
+        function segmentSphere(a, b, c, r) {
+          const d = vec(b.x - a.x, b.y - a.y, b.z - a.z),
+            l = d.x * d.x + d.y * d.y + d.z * d.z;
+          if (!l) return distance(a, c) < r;
+          const t = clamp(((c.x - a.x) * d.x + (c.y - a.y) * d.y + (c.z - a.z) * d.z) / l, 0, 1);
+          return distance(vec(a.x + d.x * t, a.y + d.y * t, a.z + d.z * t), c) < r;
+        }
+        function lineOfSight(g, a, b, smoke = true) {
+          const len = distance(a, b);
+          if (!len) return true;
+          const d = normal(vec(b.x - a.x, b.y - a.y, b.z - a.z));
+          for (const box of g.world.boxes) {
+            const hit = rayBox(a, d, bounds(box));
+            if (hit && hit.t < len - 0.05) return false;
+          }
+          if (smoke)
+            for (const cloud of g.smokes)
+              if (cloud.time > 0 && segmentSphere(a, b, cloud.pos, cloud.radius)) return false;
+          return true;
+        }
+        function clearBody(world, x, y, z, crouch = false) {
+          const height = crouch ? 1.13 : 1.78;
+          for (const b of world.boxes)
+            if (
+              Math.abs(x - b.x) < b.w / 2 + 0.36 &&
+              Math.abs(z - b.z) < b.d / 2 + 0.36 &&
+              y < b.y + b.h / 2 - 0.02 &&
+              y + height > b.y - b.h / 2 + 0.02
+            )
+              return false;
+          return true;
+        }
+        function makeGraph(world) {
+          const nodes = [],
+            lookup = new Map(),
+            step = 2.5;
+          for (let iz = 0; iz < 33; iz++)
+            for (let ix = 0; ix < 35; ix++) {
+              const x = -42.5 + ix * step,
+                z = -40 + iz * step,
+                y = floorAt(world, x, z);
+              if (clearBody(world, x, y, z)) {
+                const node = { id: nodes.length, x, y, z, ix, iz, links: [] };
+                lookup.set(`${ix},${iz}`, node);
+                nodes.push(node);
+              }
+            }
+          for (const n of nodes)
+            for (const [dx, dz] of [
+              [1, 0],
+              [-1, 0],
+              [0, 1],
+              [0, -1],
+              [1, 1],
+              [-1, 1],
+              [1, -1],
+              [-1, -1],
+            ]) {
+              const other = lookup.get(`${n.ix + dx},${n.iz + dz}`);
+              if (!other || Math.abs(n.y - other.y) > 0.65) continue;
+              let clear = true;
+              for (let t = 0.2; t < 1; t += 0.2)
+                if (
+                  !clearBody(
+                    world,
+                    n.x + (other.x - n.x) * t,
+                    n.y + (other.y - n.y) * t,
+                    n.z + (other.z - n.z) * t,
+                  )
+                ) {
+                  clear = false;
+                  break;
+                }
+              if (clear) n.links.push(other.id);
+            }
+          return nodes;
+        }
+        function nearestNode(graph, p) {
+          let best = 0,
+            d = Infinity;
+          for (const n of graph) {
+            const dist = (n.x - p.x) ** 2 + (n.z - p.z) ** 2;
+            if (dist < d) {
+              d = dist;
+              best = n.id;
+            }
+          }
+          return best;
+        }
+        function astar(graph, start, end) {
+          if (start === end) return [graph[end]];
+          const open = [start],
+            cost = new Map([[start, 0]]),
+            parent = new Map(),
+            closed = new Set();
+          while (open.length) {
+            open.sort(
+              (a, b) =>
+                cost.get(b) +
+                horizontal(graph[b], graph[end]) -
+                cost.get(a) -
+                horizontal(graph[a], graph[end]),
+            );
+            const id = open.pop();
+            if (id === end) {
+              const result = [];
+              let cur = end;
+              while (cur !== start) {
+                result.unshift(graph[cur]);
+                cur = parent.get(cur);
+              }
+              return result;
+            }
+            if (closed.has(id)) continue;
+            closed.add(id);
+            for (const next of graph[id].links) {
+              if (closed.has(next)) continue;
+              const candidate = cost.get(id) + horizontal(graph[id], graph[next]);
+              if (candidate < (cost.get(next) ?? Infinity)) {
+                cost.set(next, candidate);
+                parent.set(next, id);
+                open.push(next);
+              }
+            }
+          }
+          return [];
+        }
+        function rng(seed) {
+          let state = seed >>> 0;
+          return () => {
+            state = (Math.imul(1664525, state) + 1013904223) >>> 0;
+            return state / 4294967296;
+          };
+        }
+        function makeWeapon(key) {
+          const c = WEAPONS[key];
+          return {
+            key,
+            mag: c.mag,
+            reserve: c.reserve,
+            reload: 0,
+            cooldown: 0,
+            shots: 0,
+            lastShot: -10,
+          };
+        }
+        function controls() {
+          return {
+            forward: 0,
+            strafe: 0,
+            jump: false,
+            crouch: false,
+            walk: false,
+            fire: false,
+            firePressed: false,
+            reload: false,
+            use: false,
+          };
+        }
+        let graphCache = null;
+        function createGame(side = 'CT', difficulty = 'Normal', seed = 1) {
+          const random = rng(seed),
+            world = map(),
+            g = {
+              world,
+              graph:
+                graphCache ||
+                (graphCache = Object.freeze(
+                  makeGraph(world).map((node) => {
+                    Object.freeze(node.links);
+                    return Object.freeze(node);
+                  }),
+                )),
+              rng: random,
+              difficulty: DIFFICULTY[difficulty] || DIFFICULTY.Normal,
+              side: [side === 'random' ? (random() < 0.5 ? 'T' : 'CT') : side, ''],
+              scores: [0, 0],
+              losses: [0, 0],
+              totalRounds: 0,
+              phase: 'freeze',
+              clock: 15,
+              time: 0,
+              actors: [],
+              events: [],
+              sounds: [],
+              grenades: [],
+              smokes: [],
+              feed: [],
+              bomb: null,
+              halftime: false,
+              aiClock: 0,
+              paused: false,
+              announcement: '',
+              announcementTime: 0,
+              winner: null,
+            };
+          g.side[1] = g.side[0] === 'CT' ? 'T' : 'CT';
+          const names = [
+            'YOU',
+            'Reed',
+            'Vega',
+            'Atlas',
+            'Kite',
+            'Rook',
+            'Echo',
+            'Flint',
+            'Nova',
+            'Sable',
+          ];
+          for (let id = 0; id < 10; id++)
+            g.actors.push({
+              id,
+              name: names[id],
+              faction: id < 5 ? 0 : 1,
+              role: id % 5,
+              bot: id !== 0,
+              pos: vec(),
+              prev: vec(),
+              vel: vec(),
+              yaw: 0,
+              pitch: 0,
+              recoilPitch: 0,
+              recoilYaw: 0,
+              hp: 100,
+              armor: 0,
+              helmet: false,
+              kit: false,
+              money: 800,
+              kills: 0,
+              deaths: 0,
+              alive: true,
+              weapons: {},
+              active: '',
+              previous: '',
+              utility: { he: 0, flash: 0, smoke: 0 },
+              scope: 0,
+              crouching: false,
+              grounded: true,
+              airPeak: 0,
+              flashBlind: 0,
+              hitTime: 0,
+              hitYaw: 0,
+              hitMarker: 0,
+              muzzle: 0,
+              drawTime: 0,
+              stepDistance: 0,
+              ctrl: controls(),
+              ai: {
+                state: 'buy',
+                path: [],
+                goal: null,
+                target: null,
+                seen: 0,
+                nextPlan: 0,
+                burst: 0,
+                wait: 0,
+                hearUntil: 0,
+                heard: null,
+              },
+            });
+          beginRound(g, true);
+          return g;
+        }
+        function event(g, type, data = {}) {
+          g.events.push({ type, ...data });
+          if (g.events.length > 160) g.events.shift();
+        }
+        function announce(g, text, time = 3) {
+          g.announcement = text;
+          g.announcementTime = time;
+          event(g, 'announce', { text });
+        }
+        function actorSide(g, a) {
+          return g.side[a.faction];
+        }
+        function beginRound(g, reset = false) {
+          if (g.totalRounds === 15 && !g.halftime) {
+            g.halftime = true;
+            g.side.reverse();
+            g.losses = [0, 0];
+            reset = true;
+          }
+          g.phase = 'freeze';
+          g.clock = 15;
+          g.grenades = [];
+          g.smokes = [];
+          g.sounds = [];
+          g.aiClock = 0;
+          for (const a of g.actors) {
+            const side = actorSide(g, a),
+              survived = a.alive;
+            if (reset) {
+              a.money = 800;
+              a.armor = 0;
+              a.helmet = false;
+              a.kit = false;
+            }
+            if (reset || !survived) {
+              a.weapons = {
+                knife: makeWeapon('knife'),
+                [side === 'T' ? 'glock' : 'usp']: makeWeapon(side === 'T' ? 'glock' : 'usp'),
+              };
+              a.utility = { he: 0, flash: 0, smoke: 0 };
+              a.armor = 0;
+              a.helmet = false;
+              a.kit = false;
+            }
+            const sideZ = side === 'T' ? 34 : -36;
+            a.pos = vec((a.role - 2) * 2.1, 0, sideZ + (a.role % 2) * 1.3);
+            a.prev = copy(a.pos);
+            a.vel = vec();
+            a.yaw = side === 'T' ? 0 : Math.PI;
+            a.pitch = 0;
+            a.recoilPitch = 0;
+            a.recoilYaw = 0;
+            a.hp = 100;
+            a.alive = true;
+            a.grounded = true;
+            a.crouching = false;
+            a.scope = 0;
+            a.flashBlind = 0;
+            a.hitTime = 0;
+            a.hitMarker = 0;
+            a.airPeak = 0;
+            a.ctrl = controls();
+            a.drawTime = 0.3;
+            for (const w of Object.values(a.weapons)) {
+              w.mag = WEAPONS[w.key].mag;
+              w.reload = 0;
+              w.cooldown = 0;
+              w.shots = 0;
+              w.lastShot = -10;
+            }
+            a.active =
+              Object.keys(a.weapons).find((k) =>
+                ['rifle', 'smg', 'sniper', 'shotgun'].includes(WEAPONS[k].slot),
+              ) || Object.keys(a.weapons).find((k) => WEAPONS[k].slot === 'pistol');
+            a.previous = 'knife';
+            a.ai = {
+              state: 'buy',
+              path: [],
+              goal: null,
+              target: null,
+              seen: 0,
+              nextPlan: 0,
+              burst: 0,
+              wait: 0,
+              hearUntil: 0,
+              heard: null,
+            };
+          }
+          const terrorists = g.actors.filter((a) => actorSide(g, a) === 'T');
+          const carrier = terrorists.find((a) => a.id === 0) || terrorists[0];
+          g.bomb = {
+            state: 'carried',
+            owner: carrier.id,
+            pos: copy(carrier.pos),
+            site: null,
+            timer: 40,
+            progress: 0,
+            user: null,
+            beep: 0,
+          };
+          for (const a of g.actors) if (a.bot) botBuy(g, a);
+          announce(
+            g,
+            g.totalRounds === 15
+              ? 'HALFTIME · SIDES SWAPPED'
+              : `ROUND ${g.totalRounds + 1} · BUY PHASE`,
+            3,
+          );
+          event(g, 'round');
+        }
+        function canBuy(g, a, key) {
+          const c = WEAPONS[key] || UTILITY[key];
+          if (!c) return 'Unknown equipment.';
+          if (g.phase !== 'freeze' || !a.alive)
+            return 'Buying is only available during the freeze phase.';
+          if (c.side && c.side !== actorSide(g, a)) return 'This item belongs to the other side.';
+          if (a.money < c.price) return 'Not enough money.';
+          if (UTILITY[key]) {
+            if (['he', 'flash', 'smoke'].includes(key)) {
+              if (
+                a.utility[key] >= (key === 'flash' ? 2 : 1) ||
+                Object.values(a.utility).reduce((x, y) => x + y, 0) >= 4
+              )
+                return 'Grenade limit reached.';
+            }
+            if (key === 'kit' && a.kit) return 'You already have a defuse kit.';
+            if (key === 'kevlar' && a.armor === 100) return 'Your armor is already full.';
+            if (key === 'helmet' && a.armor === 100 && a.helmet)
+              return 'Your armor and helmet are already full.';
+          } else if (key === 'knife' || a.weapons[key]) return 'Already equipped.';
+          return '';
+        }
+        function buy(g, a, key) {
+          const error = canBuy(g, a, key);
+          if (error) return { ok: false, message: error };
+          const c = WEAPONS[key] || UTILITY[key];
+          a.money -= c.price;
+          if (WEAPONS[key]) {
+            const slot = WEAPONS[key].slot;
+            for (const owned of Object.keys(a.weapons))
+              if (
+                WEAPONS[owned].slot !== 'knife' &&
+                (slot === 'pistol'
+                  ? WEAPONS[owned].slot === 'pistol'
+                  : WEAPONS[owned].slot !== 'pistol')
+              )
+                delete a.weapons[owned];
+            a.weapons[key] = makeWeapon(key);
+            equip(a, key);
+          } else if (key === 'kevlar' || key === 'helmet') {
+            a.armor = 100;
+            if (key === 'helmet') a.helmet = true;
+          } else if (key === 'kit') a.kit = true;
+          else a.utility[key]++;
+          event(g, 'buy', { actor: a.id, pos: copy(a.pos) });
+          return { ok: true, message: `${c.name} purchased.` };
+        }
+        function botBuy(g, a) {
+          const rifle = actorSide(g, a) === 'T' ? 'ak47' : 'm4a1';
+          if (!Object.keys(a.weapons).some((k) => !['knife', 'pistol'].includes(WEAPONS[k].slot))) {
+            const choice =
+              a.role === 4 && a.money >= 5750
+                ? 'awp'
+                : a.money >= WEAPONS[rifle].price + 650
+                  ? rifle
+                  : a.money >= 2150
+                    ? 'mp5'
+                    : a.money >= 1300
+                      ? 'deagle'
+                      : null;
+            if (choice) buy(g, a, choice);
+          }
+          if (a.money >= 1000 && !a.helmet) buy(g, a, 'helmet');
+          else if (a.money >= 650 && a.armor < 80) buy(g, a, 'kevlar');
+          if (actorSide(g, a) === 'CT' && a.money >= 400 && !a.kit) buy(g, a, 'kit');
+          for (const key of ['he', 'smoke', 'flash'])
+            if (a.money >= UTILITY[key].price + 200 && a.utility[key] === 0) buy(g, a, key);
+        }
+        function equip(a, key) {
+          if (!a.weapons[key] && !a.utility[key] && key !== 'bomb') return false;
+          if (a.active !== key) {
+            a.previous = a.active;
+            a.active = key;
+            a.scope = 0;
+            a.drawTime = 0.22;
+          }
+          return true;
+        }
+        function lossReward(streak) {
+          return Math.min(3400, 1400 + 500 * Math.max(0, streak - 1));
+        }
+        function grant(a, amount) {
+          a.money = clamp(a.money + amount, 0, 16000);
+        }
+        function settle(g, side, reason) {
+          if (g.phase !== 'active') return;
+          const faction = g.side.indexOf(side);
+          g.scores[faction]++;
+          g.losses[faction] = 0;
+          g.losses[1 - faction]++;
+          for (const a of g.actors)
+            grant(a, a.faction === faction ? 3250 : lossReward(g.losses[a.faction]));
+          g.totalRounds++;
+          g.phase = 'intermission';
+          g.clock = 5;
+          g.bomb.progress = 0;
+          g.bomb.user = null;
+          announce(g, `${side === 'CT' ? 'COUNTER-TERRORISTS' : 'TERRORISTS'} WIN · ${reason}`, 5);
+          event(g, 'win', { side, reason });
+          if (g.scores[faction] >= 16 || g.totalRounds >= 30) {
+            g.phase = 'finished';
+            g.winner = g.scores[0] === g.scores[1] ? -1 : g.scores[0] > g.scores[1] ? 0 : 1;
+            event(g, 'match-end');
+          }
+        }
+        function sound(g, a, kind, range) {
+          g.sounds.push({
+            actor: a.id,
+            faction: a.faction,
+            pos: copy(a.pos),
+            time: g.time,
+            kind,
+            range,
+          });
+          if (g.sounds.length > 40) g.sounds.shift();
+        }
+        function damage(g, target, amount, source, weapon = 'knife', region = 'chest') {
+          if (!target.alive || g.phase !== 'active') return;
+          const config = WEAPONS[weapon],
+            penetration = config?.penetration ?? 0.65;
+          if (
+            weapon !== 'fall' &&
+            target.armor > 0 &&
+            region !== 'legs' &&
+            (region !== 'head' || target.helmet)
+          ) {
+            const absorbed = Math.min(target.armor, amount * (1 - penetration) * 0.5);
+            target.armor = Math.max(0, target.armor - absorbed);
+            amount -= absorbed;
+          }
+          target.hp = Math.max(0, target.hp - amount);
+          target.hitTime = 0.6;
+          target.hitYaw = source
+            ? Math.atan2(target.pos.x - source.pos.x, target.pos.z - source.pos.z) - target.yaw
+            : 0;
+          event(g, 'damage', {
+            actor: target.id,
+            source: source?.id,
+            pos: eye(target),
+            amount,
+            head: region === 'head',
+          });
+          if (source && source.id === 0 && target.faction !== source.faction)
+            source.hitMarker = 0.15;
+          if (target.hp <= 0) {
+            target.alive = false;
+            target.deaths++;
+            target.ctrl = controls();
+            if (source && source.id !== target.id && source.faction !== target.faction) {
+              source.kills++;
+              grant(source, config?.reward || 300);
+            }
+            if (g.bomb.owner === target.id && g.bomb.state === 'carried') {
+              g.bomb.owner = null;
+              g.bomb.state = 'dropped';
+              g.bomb.pos = copy(target.pos);
+              g.bomb.progress = 0;
+              g.bomb.user = null;
+            }
+            g.feed.unshift({
+              attacker: source?.name || 'World',
+              victim: target.name,
+              weapon: config?.name || weapon.toUpperCase(),
+              head: region === 'head',
+              faction: source?.faction,
+              time: g.time,
+            });
+            g.feed = g.feed.slice(0, 5);
+            event(g, 'kill', { actor: target.id, source: source?.id });
+          }
+        }
+        function hitboxes(a) {
+          const p = a.pos,
+            s = a.crouching ? 0.65 : 1;
+          return [
+            ['head', 4, -0.19, 0.19, 1.45, 1.84, -0.2, 0.2],
+            ['chest', 1, -0.28, 0.28, 0.98, 1.45, -0.2, 0.2],
+            ['stomach', 1.25, -0.27, 0.27, 0.65, 0.98, -0.2, 0.2],
+            ['arms', 0.9, -0.46, 0.46, 0.87, 1.42, -0.18, 0.18],
+            ['legs', 0.75, -0.24, 0.24, 0.05, 0.65, -0.2, 0.2],
+          ].map(([region, mult, x0, x1, y0, y1, z0, z1]) => ({
+            region,
+            mult,
+            min: vec(p.x + x0, p.y + y0 * s, p.z + z0),
+            max: vec(p.x + x1, p.y + y1 * s, p.z + z1),
+          }));
+        }
+        function traceShot(g, actor, origin, dir, range = 150) {
+          const hits = [];
+          for (const b of g.world.boxes) {
+            const hit = rayBox(origin, dir, bounds(b));
+            if (hit && hit.t < range) hits.push({ ...hit, box: b });
+          }
+          for (const other of g.actors)
+            if (other.alive && other.id !== actor.id && other.faction !== actor.faction) {
+              for (const box of hitboxes(other)) {
+                const hit = rayBox(origin, dir, box);
+                if (hit && hit.t < range)
+                  hits.push({ ...hit, target: other, region: box.region, mult: box.mult });
+              }
+            }
+          hits.sort((a, b) => a.t - b.t);
+          let energy = 1,
+            penetrations = 0;
+          const cfg = WEAPONS[actor.active] || WEAPONS.usp;
+          for (const hit of hits) {
+            if (hit.target) return { ...hit, energy };
+            if (
+              cfg.slot === 'knife' ||
+              !hit.box.penetrable ||
+              hit.exit - hit.t > 2.4 ||
+              cfg.penetration < 0.45 ||
+              ++penetrations > 2
+            )
+              return { ...hit, energy, blocked: true };
+            energy *= hit.box.material === 'metal' ? 0.42 : 0.58;
+            event(g, 'impact', {
+              pos: vec(
+                origin.x + dir.x * hit.t,
+                origin.y + dir.y * hit.t,
+                origin.z + dir.z * hit.t,
+              ),
+              normal: hit.normal,
+            });
+          }
+          return { t: range, energy };
+        }
+        function fire(g, a, forced = false) {
+          if (g.phase !== 'active' || !a.alive || a.drawTime > 0) return false;
+          if (['he', 'flash', 'smoke'].includes(a.active)) return throwGrenade(g, a, a.active);
+          const w = a.weapons[a.active],
+            c = WEAPONS[a.active];
+          if (!w || !c || w.cooldown > 0 || w.reload > 0 || a.active === 'bomb') return false;
+          if (c.slot !== 'knife' && w.mag <= 0) return false;
+          if (!forced && !c.automatic && !a.ctrl.firePressed) return false;
+          w.cooldown = c.rate;
+          if (c.slot !== 'knife') w.mag--;
+          if (g.time - w.lastShot > 0.4) w.shots = 0;
+          const recoil = c.recoil[Math.min(w.shots, c.recoil.length - 1)],
+            motion = Math.hypot(a.vel.x, a.vel.z);
+          let spread = !a.grounded
+            ? c.spread.jump
+            : a.crouching
+              ? c.spread.crouch
+              : motion > 1.2
+                ? c.spread.move
+                : c.spread.stand;
+          if (c.scope && a.scope) spread = !a.grounded ? 0.05 : motion > 1 ? 0.014 : 0.001;
+          spread += Math.min(0.035, w.shots * 0.0012);
+          const origin = eye(a),
+            pellets = c.pellets || 1;
+          for (let i = 0; i < pellets; i++) {
+            const dir = direction(
+                a.yaw + a.recoilYaw + (g.rng() - 0.5) * spread * 2,
+                a.pitch + a.recoilPitch + (g.rng() - 0.5) * spread * 2,
+              ),
+              hit = traceShot(g, a, origin, dir, c.range || 150),
+              pos = vec(
+                origin.x + dir.x * hit.t,
+                origin.y + dir.y * hit.t,
+                origin.z + dir.z * hit.t,
+              );
+            if (hit.target)
+              damage(
+                g,
+                hit.target,
+                c.damage * (hit.region === 'head' ? c.head : hit.mult) * hit.energy,
+                a,
+                a.active,
+                hit.region,
+              );
+            else if (hit.box) event(g, 'impact', { pos, normal: hit.normal });
+            event(g, 'shot', { actor: a.id, weapon: a.active, origin: copy(origin), pos });
+          }
+          w.shots++;
+          w.lastShot = g.time;
+          a.recoilPitch = clamp(a.recoilPitch + recoil[0], 0, 0.28);
+          a.recoilYaw += recoil[1];
+          a.muzzle = 0.065;
+          a.scope = c.scope ? 0 : a.scope;
+          sound(g, a, 'gunshot', 45);
+          return true;
+        }
+        function reload(g, a) {
+          const w = a.weapons[a.active],
+            c = WEAPONS[a.active];
+          if (
+            !a.alive ||
+            !w ||
+            !c.mag ||
+            w.reload ||
+            w.mag >= c.mag ||
+            w.reserve <= 0 ||
+            g.phase === 'intermission' ||
+            g.phase === 'finished'
+          )
+            return false;
+          w.reload = c.reload;
+          a.scope = 0;
+          event(g, 'reload', { actor: a.id, pos: eye(a), duration: c.reload });
+          return true;
+        }
+        function throwGrenade(g, a, key) {
+          if (g.phase !== 'active' || !a.alive || !a.utility[key] || a.drawTime > 0) return false;
+          const d = direction(a.yaw, a.pitch),
+            pos = eye(a);
+          pos.x += d.x * 0.6;
+          pos.z += d.z * 0.6;
+          if (!clearBody(g.world, pos.x, a.pos.y, pos.z, a.crouching)) {
+            pos.x = a.pos.x;
+            pos.z = a.pos.z;
+          }
+          a.utility[key]--;
+          g.grenades.push({
+            id: g.time + a.id / 1000,
+            kind: key,
+            owner: a.id,
+            pos,
+            vel: vec(d.x * 16, d.y * 16 + 5, d.z * 16),
+            fuse: key === 'smoke' ? 2 : 1.6,
+            bounce: 0,
+          });
+          equip(
+            a,
+            a.previous in a.weapons
+              ? a.previous
+              : Object.keys(a.weapons).find((k) => WEAPONS[k].slot !== 'knife') || 'knife',
+          );
+          event(g, 'throw', { actor: a.id });
+          return true;
+        }
+        function burstGrenade(g, grenade) {
+          const owner = g.actors[grenade.owner],
+            p = grenade.pos;
+          if (grenade.kind === 'smoke') {
+            g.smokes.push({ id: grenade.id, pos: copy(p), time: 18, radius: 5 });
+            event(g, 'smoke', { pos: copy(p) });
+          } else if (grenade.kind === 'he') {
+            for (const a of g.actors)
+              if (a.alive) {
+                const d = distance(eye(a), p);
+                if (d < 11) {
+                  let amount = 105 * (1 - d / 11) * (lineOfSight(g, p, eye(a), false) ? 1 : 0.2);
+                  if (a.faction === owner.faction && a.id !== owner.id) amount *= 0.2;
+                  damage(g, a, amount, owner, 'he');
+                }
+              }
+            event(g, 'explosion', { pos: copy(p) });
+          } else {
+            for (const a of g.actors)
+              if (a.alive) {
+                const e = eye(a),
+                  d = distance(e, p);
+                if (d < 25 && lineOfSight(g, p, e, false)) {
+                  const facing = direction(a.yaw, a.pitch),
+                    to = normal(vec(p.x - e.x, p.y - e.y, p.z - e.z)),
+                    dot = facing.x * to.x + facing.y * to.y + facing.z * to.z;
+                  a.flashBlind = Math.max(
+                    a.flashBlind,
+                    (1 - d / 25) * (dot > 0.3 ? 4 : dot > -0.3 ? 2 : 1),
+                  );
+                }
+              }
+            event(g, 'flash', { pos: copy(p) });
+          }
+        }
+        function grenadePhysics(g, dt) {
+          for (const n of g.grenades) {
+            n.fuse -= dt;
+            n.bounce = Math.max(0, n.bounce - dt);
+            n.vel.y -= 18 * dt;
+            const next = vec(
+                n.pos.x + n.vel.x * dt,
+                n.pos.y + n.vel.y * dt,
+                n.pos.z + n.vel.z * dt,
+              ),
+              ground = floorAt(g.world, next.x, next.z) + 0.12;
+            let bounced = false;
+            if (next.y < ground) {
+              next.y = ground;
+              n.vel.y = Math.abs(n.vel.y) * 0.48;
+              n.vel.x *= 0.72;
+              n.vel.z *= 0.72;
+              bounced = true;
+            }
+            for (const b of g.world.boxes) {
+              const q = bounds(b, 0.12);
+              if (
+                next.x > q.min.x &&
+                next.x < q.max.x &&
+                next.y > q.min.y &&
+                next.y < q.max.y &&
+                next.z > q.min.z &&
+                next.z < q.max.z
+              ) {
+                if (n.pos.x <= q.min.x || n.pos.x >= q.max.x) {
+                  next.x = n.pos.x;
+                  n.vel.x *= -0.55;
+                } else if (n.pos.z <= q.min.z || n.pos.z >= q.max.z) {
+                  next.z = n.pos.z;
+                  n.vel.z *= -0.55;
+                } else {
+                  next.y = n.pos.y;
+                  n.vel.y *= -0.5;
+                }
+                bounced = true;
+              }
+            }
+            n.pos = next;
+            if (bounced && n.bounce === 0) {
+              event(g, 'bounce', { pos: copy(n.pos) });
+              n.bounce = 0.1;
+            }
+            if (n.fuse <= 0) burstGrenade(g, n);
+          }
+          g.grenades = g.grenades.filter((n) => n.fuse > 0);
+          for (const c of g.smokes) c.time -= dt;
+          g.smokes = g.smokes.filter((c) => c.time > 0);
+        }
+        function moveActor(g, a, dt) {
+          const ctl = a.ctrl,
+            c = WEAPONS[a.active] || WEAPONS.knife;
+          const canStand = clearBody(g.world, a.pos.x, a.pos.y, a.pos.z, false);
+          a.crouching = ctl.crouch || !canStand;
+          const speed =
+            6 *
+            c.speed *
+            (a.crouching ? 0.42 : ctl.walk ? 0.5 : 1) *
+            (a.scope ? 0.45 : 1) *
+            (a.bot ? g.difficulty.speed : 1);
+          const f = direction(a.yaw),
+            right = vec(Math.cos(a.yaw), 0, -Math.sin(a.yaw)),
+            wish = vec(
+              f.x * ctl.forward + right.x * ctl.strafe,
+              0,
+              f.z * ctl.forward + right.z * ctl.strafe,
+            ),
+            length = Math.hypot(wish.x, wish.z);
+          if (length > 0) {
+            wish.x /= length;
+            wish.z /= length;
+          }
+          if (a.grounded) {
+            const velocity = Math.hypot(a.vel.x, a.vel.z);
+            if (velocity > 0) {
+              const dropped = Math.max(0, velocity - Math.max(velocity, 2) * 6 * dt);
+              a.vel.x *= dropped / velocity;
+              a.vel.z *= dropped / velocity;
+            }
+          }
+          const target = a.grounded ? speed : Math.min(speed, 1.9),
+            current = a.vel.x * wish.x + a.vel.z * wish.z,
+            add = target - current;
+          if (length && add > 0) {
+            const accel = Math.min(add, (a.grounded ? 12 : 25) * speed * dt);
+            a.vel.x += wish.x * accel;
+            a.vel.z += wish.z * accel;
+          }
+          if (ctl.jump && a.grounded) {
+            a.vel.y = 7.4;
+            a.grounded = false;
+            a.airPeak = a.pos.y;
+            event(g, 'jump', { actor: a.id });
+          }
+          a.vel.y -= 18 * dt;
+          const old = copy(a.pos);
+          for (const axis of ['x', 'z']) {
+            const next = a.pos[axis] + a.vel[axis] * dt,
+              position = { ...a.pos, [axis]: next },
+              floor = floorAt(g.world, position.x, position.z);
+            let y = a.pos.y;
+            if (a.grounded && floor <= y + 0.36) y = Math.max(y, floor);
+            if (floor > a.pos.y + (a.grounded ? 0.36 : 0.04)) {
+              a.vel[axis] = 0;
+              continue;
+            }
+            if (clearBody(g.world, position.x, y, position.z, a.crouching)) {
+              a.pos[axis] = next;
+              a.pos.y = y;
+            } else {
+              let step = 0;
+              for (const b of g.world.boxes)
+                if (
+                  Math.abs(position.x - b.x) < b.w / 2 + 0.36 &&
+                  Math.abs(position.z - b.z) < b.d / 2 + 0.36
+                ) {
+                  const top = b.y + b.h / 2;
+                  if (top > a.pos.y && top <= a.pos.y + 0.35) step = Math.max(step, top);
+                }
+              if (
+                step &&
+                a.grounded &&
+                clearBody(g.world, position.x, step, position.z, a.crouching)
+              ) {
+                a.pos[axis] = next;
+                a.pos.y = step;
+              } else a.vel[axis] = 0;
+            }
+          }
+          const nextY = a.pos.y + a.vel.y * dt;
+          if (a.vel.y > 0 && !clearBody(g.world, a.pos.x, nextY, a.pos.z, a.crouching)) a.vel.y = 0;
+          else a.pos.y = nextY;
+          let ground = floorAt(g.world, a.pos.x, a.pos.z);
+          for (const b of g.world.boxes)
+            if (
+              Math.abs(a.pos.x - b.x) < b.w / 2 + 0.25 &&
+              Math.abs(a.pos.z - b.z) < b.d / 2 + 0.25 &&
+              old.y >= b.y + b.h / 2 - 0.05
+            )
+              ground = Math.max(ground, b.y + b.h / 2);
+          a.airPeak = Math.max(a.airPeak, a.pos.y);
+          if (a.pos.y <= ground && a.vel.y <= 0) {
+            if (!a.grounded && a.airPeak - ground > 3.7)
+              damage(g, a, (a.airPeak - ground - 3.7) * 14, null, 'fall');
+            a.pos.y = ground;
+            a.vel.y = 0;
+            a.grounded = true;
+            a.airPeak = ground;
+          } else if (a.pos.y > ground + 0.04) a.grounded = false;
+          a.stepDistance += horizontal(old, a.pos);
+          if (
+            a.grounded &&
+            !ctl.walk &&
+            !a.crouching &&
+            Math.hypot(a.vel.x, a.vel.z) > 2.3 &&
+            a.stepDistance > 0.9
+          ) {
+            a.stepDistance = 0;
+            sound(g, a, 'footstep', 16);
+            event(g, 'footstep', { actor: a.id, pos: copy(a.pos) });
+          }
+        }
+        function siteAt(p) {
+          return SITES.find((s) => Math.abs(p.x - s.x) < s.w / 2 && Math.abs(p.z - s.z) < s.d / 2);
+        }
+        function dropBomb(g, a) {
+          if (g.bomb.state === 'carried' && g.bomb.owner === a.id) {
+            g.bomb.state = 'dropped';
+            g.bomb.owner = null;
+            g.bomb.pos = copy(a.pos);
+            g.bomb.pos.z += direction(a.yaw).z * 1.8;
+            g.bomb.pos.x += direction(a.yaw).x * 1.8;
+            g.bomb.progress = 0;
+            g.bomb.user = null;
+            announce(g, 'Bomb dropped. A teammate can pick it up.', 2);
+            return true;
+          }
+          return false;
+        }
+        function updateBomb(g, dt) {
+          const b = g.bomb;
+          if (b.state === 'dropped')
+            for (const a of g.actors)
+              if (a.alive && actorSide(g, a) === 'T' && horizontal(a.pos, b.pos) < 1.5) {
+                b.state = 'carried';
+                b.owner = a.id;
+                event(g, 'pickup', { actor: a.id, pos: copy(a.pos) });
+                break;
+              }
+          if (b.state === 'carried') b.pos = copy(g.actors[b.owner].pos);
+          let user = null,
+            duration = 0;
+          if (b.state === 'carried') {
+            const a = g.actors[b.owner];
+            if (
+              a.alive &&
+              a.ctrl.use &&
+              a.grounded &&
+              Math.hypot(a.vel.x, a.vel.z) < 0.5 &&
+              siteAt(a.pos)
+            ) {
+              user = a;
+              duration = 3;
+            }
+          } else if (b.state === 'planted') {
+            user = g.actors.find(
+              (a) =>
+                a.alive &&
+                actorSide(g, a) === 'CT' &&
+                a.ctrl.use &&
+                a.grounded &&
+                horizontal(a.pos, b.pos) < 2.25 &&
+                Math.hypot(a.vel.x, a.vel.z) < 0.5,
+            );
+            if (user) duration = user.kit ? 5 : 10;
+          }
+          if (user) {
+            if (b.user !== user.id) {
+              b.user = user.id;
+              b.progress = 0;
+              event(g, 'interaction', {
+                actor: user.id,
+                pos: copy(b.pos),
+                kind: b.state === 'planted' ? 'defuse' : 'plant',
+              });
+              sound(g, user, b.state === 'planted' ? 'defuse' : 'plant', 40);
+            }
+            b.progress += dt;
+            if (b.progress >= duration) {
+              if (b.state === 'carried') {
+                b.state = 'planted';
+                b.site = siteAt(user.pos).name;
+                b.pos = copy(user.pos);
+                b.owner = null;
+                b.timer = 40;
+                b.beep = 0;
+                grant(user, 800);
+                announce(g, `BOMB PLANTED · SITE ${b.site}`, 4);
+                event(g, 'plant', { pos: copy(b.pos) });
+              } else {
+                b.state = 'defused';
+                event(g, 'defuse', { pos: copy(b.pos) });
+                settle(g, 'CT', 'Bomb defused');
+              }
+              b.progress = 0;
+              b.user = null;
+            }
+          } else {
+            b.progress = 0;
+            b.user = null;
+          }
+          if (b.state === 'planted') {
+            b.timer = Math.max(0, b.timer - dt);
+            b.beep -= dt;
+            if (b.beep <= 0) {
+              event(g, 'beep', { pos: copy(b.pos), timer: b.timer });
+              b.beep = b.timer > 20 ? 1 : b.timer > 10 ? 0.6 : b.timer > 5 ? 0.35 : 0.18;
+            }
+            if (b.timer <= 0) {
+              b.state = 'exploded';
+              event(g, 'explosion', { pos: copy(b.pos), bomb: true });
+              settle(g, 'T', 'Bomb exploded');
+            }
+          }
+        }
+        function botAI(g, a, dt) {
+          const ai = a.ai,
+            side = actorSide(g, a),
+            e = eye(a);
+          a.ctrl = controls();
+          if (a.flashBlind > 0.3) {
+            ai.state = 'retreat';
+            return;
+          }
+          let target = null,
+            best = Infinity;
+          for (const foe of g.actors)
+            if (foe.alive && foe.faction !== a.faction) {
+              const dist = horizontal(a.pos, foe.pos),
+                angle = Math.atan2(a.pos.x - foe.pos.x, a.pos.z - foe.pos.z),
+                delta = Math.atan2(Math.sin(angle - a.yaw), Math.cos(angle - a.yaw));
+              if (
+                dist < best &&
+                (Math.abs(delta) < g.difficulty.vision || dist < 4 || ai.target === foe.id) &&
+                lineOfSight(g, e, eye(foe))
+              ) {
+                target = foe;
+                best = dist;
+              }
+            }
+          if (target) {
+            if (ai.target !== target.id) {
+              ai.target = target.id;
+              ai.seen = 0;
+            }
+            ai.seen += dt;
+            ai.state = a.hp < 24 ? 'retreat' : 'engage';
+            const head = g.rng() < g.difficulty.head,
+              height = head ? (target.crouching ? 1.05 : 1.65) : target.crouching ? 0.65 : 1.05,
+              aim = vec(target.pos.x, target.pos.y + height, target.pos.z);
+            a.yaw =
+              Math.atan2(a.pos.x - aim.x, a.pos.z - aim.z) + (g.rng() - 0.5) * g.difficulty.error;
+            a.pitch =
+              Math.atan2(aim.y - e.y, horizontal(aim, e)) + (g.rng() - 0.5) * g.difficulty.error;
+            if (ai.seen >= g.difficulty.reaction) {
+              if (WEAPONS[a.active]?.scope && !a.weapons[a.active].reload) a.scope = 1;
+              ai.burst -= dt;
+              ai.wait -= dt;
+              if (ai.burst <= 0 && ai.wait <= 0) {
+                ai.burst = 0.25 + g.rng() * 0.25;
+                ai.wait = ai.burst + 0.18 + g.rng() * 0.3;
+              }
+              if (ai.burst > 0) {
+                a.ctrl.fire = true;
+                a.ctrl.firePressed = true;
+              }
+              a.ctrl.crouch = best > 14 && a.hp > 30;
+              if (a.hp < 24) a.ctrl.forward = -1;
+              else if (best < 3) a.ctrl.strafe = a.role % 2 ? 1 : -1;
+            }
+            const w = a.weapons[a.active];
+            if (w?.mag === 0) a.ctrl.reload = true;
+            if (a.utility.he && best > 7 && best < 22 && g.rng() < 0.015) {
+              const old = a.active;
+              equip(a, 'he');
+              a.drawTime = 0;
+              throwGrenade(g, a, 'he');
+              equip(a, old);
+            } else if (a.utility.flash && best > 8 && best < 24 && g.rng() < 0.01) {
+              const old = a.active;
+              equip(a, 'flash');
+              a.drawTime = 0;
+              throwGrenade(g, a, 'flash');
+              equip(a, old);
+            }
+            return;
+          }
+          ai.target = null;
+          ai.seen = 0;
+          a.pitch = 0;
+          for (const s of g.sounds)
+            if (
+              s.faction !== a.faction &&
+              g.time - s.time < 1 &&
+              horizontal(a.pos, s.pos) < s.range
+            ) {
+              ai.heard = copy(s.pos);
+              ai.hearUntil = g.time + 3;
+            }
+          const bomb = g.bomb;
+          let goal;
+          if (side === 'T') {
+            if (bomb.state === 'planted') {
+              ai.state = 'hold';
+              goal = vec(
+                bomb.pos.x + (a.role % 2 ? 4 : -4),
+                bomb.pos.y,
+                bomb.pos.z + (a.role < 3 ? 4 : -3),
+              );
+            } else if (bomb.state === 'dropped') {
+              ai.state = 'objective';
+              goal = bomb.pos;
+            } else if (bomb.owner === a.id) {
+              ai.state = 'plant';
+              const site = SITES[a.role >= 3 ? 1 : 0];
+              goal = vec(site.x, floorAt(g.world, site.x, site.z), site.z);
+              if (siteAt(a.pos)) {
+                a.ctrl.use = true;
+                return;
+              }
+            } else {
+              ai.state = 'objective';
+              const site = SITES[a.role >= 3 ? 1 : 0];
+              goal = vec(site.x + (a.role % 2 ? 4 : -4), 0, site.z + 4);
+            }
+          } else if (bomb.state === 'planted') {
+            ai.state = 'defuse';
+            goal = bomb.pos;
+            if (horizontal(a.pos, goal) < 2) {
+              a.ctrl.use = true;
+              return;
+            }
+          } else {
+            ai.state = 'hold';
+            const site = SITES[a.role >= 3 ? 1 : 0];
+            goal =
+              a.role === 2 ? vec(0, 0, -12) : vec(site.x + (a.role % 2 ? 5 : -4), 0, site.z + 5);
+          }
+          if (ai.heard && g.time < ai.hearUntil && ai.state === 'hold') {
+            ai.state = 'rotate';
+            goal = ai.heard;
+          }
+          const reached = horizontal(a.pos, goal) < 1.3;
+          if (reached) {
+            a.yaw = side === 'CT' ? Math.PI : 0;
+            if (bomb.state === 'planted')
+              a.yaw = Math.atan2(a.pos.x - bomb.pos.x, a.pos.z - bomb.pos.z);
+            a.ctrl.crouch = true;
+            return;
+          }
+          if (
+            !ai.goal ||
+            horizontal(ai.goal, goal) > 3 ||
+            g.time >= ai.nextPlan ||
+            !ai.path.length
+          ) {
+            ai.goal = copy(goal);
+            ai.path = astar(g.graph, nearestNode(g.graph, a.pos), nearestNode(g.graph, goal));
+            ai.nextPlan = g.time + 1.8 + g.rng() * 0.6;
+          }
+          while (ai.path.length && horizontal(a.pos, ai.path[0]) < 0.8) ai.path.shift();
+          const next = ai.path[0] || goal;
+          a.yaw = Math.atan2(a.pos.x - next.x, a.pos.z - next.z);
+          a.ctrl.forward = 1;
+          if (next.y > a.pos.y + 0.4) a.ctrl.jump = true;
+          const w = a.weapons[a.active];
+          if (w && w.mag < Math.min(8, WEAPONS[a.active].mag) && w.reserve) a.ctrl.reload = true;
+          if (
+            bomb.state === 'planted' &&
+            side === 'CT' &&
+            a.utility.smoke &&
+            horizontal(a.pos, bomb.pos) < 13 &&
+            horizontal(a.pos, bomb.pos) > 6
+          ) {
+            equip(a, 'smoke');
+            a.drawTime = 0;
+            throwGrenade(g, a, 'smoke');
+          }
+        }
+        function step(g, dt, input = controls()) {
+          if (g.paused || g.phase === 'finished') return;
+          g.time += dt;
+          g.announcementTime = Math.max(0, g.announcementTime - dt);
+          g.sounds = g.sounds.filter((s) => g.time - s.time < 4);
+          if (g.phase === 'intermission') {
+            g.clock -= dt;
+            if (g.clock <= 0) beginRound(g);
+            return;
+          }
+          if (g.phase === 'freeze') {
+            g.clock = Math.max(0, g.clock - dt);
+            if (g.clock === 0) {
+              g.phase = 'active';
+              g.clock = 115;
+              announce(g, 'ROUND LIVE · PLAY THE OBJECTIVE', 2);
+              event(g, 'live');
+            }
+            return;
+          }
+          g.actors[0].ctrl = input;
+          g.aiClock -= dt;
+          if (g.aiClock <= 0) {
+            for (const a of g.actors) if (a.bot && a.alive) botAI(g, a, 0.1);
+            g.aiClock = 0.1;
+          }
+          for (const a of g.actors) {
+            a.prev = copy(a.pos);
+            a.hitTime = Math.max(0, a.hitTime - dt);
+            a.hitMarker = Math.max(0, a.hitMarker - dt);
+            a.flashBlind = Math.max(0, a.flashBlind - dt);
+            a.muzzle = Math.max(0, a.muzzle - dt);
+            a.drawTime = Math.max(0, a.drawTime - dt);
+            if (!a.alive) continue;
+            for (const w of Object.values(a.weapons)) {
+              w.cooldown = Math.max(0, w.cooldown - dt);
+              if (w.reload) {
+                const was = w.reload;
+                w.reload = Math.max(0, w.reload - dt);
+                if (was > 0 && w.reload === 0) {
+                  const needed = WEAPONS[w.key].mag - w.mag,
+                    amount = Math.min(needed, w.reserve);
+                  w.mag += amount;
+                  w.reserve -= amount;
+                }
+              }
+            }
+            const w = a.weapons[a.active];
+            if (!w || g.time - w.lastShot > 0.28) {
+              a.recoilPitch *= Math.exp(-dt * 8);
+              a.recoilYaw *= Math.exp(-dt * 8);
+            }
+            moveActor(g, a, dt);
+            if (a.ctrl.reload) reload(g, a);
+            if (!a.ctrl.use && (a.ctrl.fire || a.ctrl.firePressed)) fire(g, a, a.bot);
+          }
+          grenadePhysics(g, dt);
+          updateBomb(g, dt);
+          if (g.phase !== 'active') return;
+          g.clock = Math.max(0, g.clock - dt);
+          const aliveT = g.actors.some((a) => a.alive && actorSide(g, a) === 'T'),
+            aliveCT = g.actors.some((a) => a.alive && actorSide(g, a) === 'CT');
+          if (!aliveCT) settle(g, 'T', 'Opponents eliminated');
+          else if (!aliveT && g.bomb.state !== 'planted') settle(g, 'CT', 'Opponents eliminated');
+          else if (g.clock === 0 && g.bomb.state !== 'planted') settle(g, 'CT', 'Time expired');
+        }
+        return {
+          DT,
+          WEAPONS,
+          UTILITY,
+          DIFFICULTY,
+          SITES,
+          vec,
+          copy,
+          clamp,
+          distance,
+          horizontal,
+          direction,
+          eye,
+          map,
+          floorAt,
+          bounds,
+          rayBox,
+          segmentSphere,
+          lineOfSight,
+          clearBody,
+          makeGraph,
+          astar,
+          nearestNode,
+          controls,
+          createGame,
+          beginRound,
+          actorSide,
+          buy,
+          canBuy,
+          equip,
+          lossReward,
+          grant,
+          settle,
+          damage,
+          hitboxes,
+          traceShot,
+          fire,
+          reload,
+          throwGrenade,
+          burstGrenade,
+          grenadePhysics,
+          moveActor,
+          siteAt,
+          dropBomb,
+          updateBomb,
+          botAI,
+          step,
+        };
+      })();
+    </script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"
+      integrity="sha384-CI3ELBVUz9XQO+97x6nwMDPosPR5XvsxW2ua7N1Xeygeh1IxtgqtCkGfQY9WWdHu"
+      crossorigin="anonymous"
+      onerror="
+        document.getElementById('fatal').textContent =
+          'The 3D library could not be loaded. Check your internet connection, then retry.';
+        document.getElementById('retry').hidden = false;
+      "
+    ></script>
+    <script id="game-runtime">
+      // Map, pooled effects, procedural audio, input, HUD and interpolated Three.js rendering.
+      (() => {
+        'use strict';
+        const $ = (id) => document.getElementById(id),
+          C = window.StrikeCore,
+          T = window.THREE;
+        if (!T) return;
+        const canvas = $('view'),
+          settings = {
+            sensitivity: 1,
+            fov: 90,
+            volume: 0.45,
+            touch: matchMedia('(pointer:coarse)').matches || innerWidth < 650,
+            bindings: { reload: 'KeyR', use: 'KeyE', buy: 'KeyB', jump: 'Space' },
+          };
+        let renderer,
+          scene,
+          camera,
+          weaponScene,
+          weaponCamera,
+          gunModel,
+          gunFlash,
+          gunKey = '',
+          world = C.map(),
+          g = null,
+          playing = false,
+          localPaused = false,
+          externalPaused = false,
+          buyOpen = false,
+          buyCategory = null,
+          scoreHeld = false,
+          scoreToggle = false,
+          unlockReason = '',
+          spectating = 1,
+          lastTime = 0,
+          accumulator = 0,
+          lastHud = 0,
+          lastScore = -1,
+          endedPosted = false,
+          ready = false;
+        const keys = new Set(),
+          pressed = new Set(),
+          mouse = { fire: false, firePressed: false },
+          stick = { x: 0, y: 0 },
+          touch = { fire: false, use: false, crouch: false, jump: false },
+          characters = new Map(),
+          smokeMeshes = new Map(),
+          grenadeMeshes = new Map();
+        const seedInput = Number(new URLSearchParams(location.search).get('seed')),
+          seed = Number.isFinite(seedInput) && seedInput > 0 ? seedInput >>> 0 : Date.now() >>> 0;
+        function post(type, data = {}) {
+          if (parent !== window)
+            parent.postMessage({ type: `strike-zone:${type}`, ...data }, location.origin);
+        }
+        function fail(message) {
+          $('loading').hidden = false;
+          $('fatal').textContent = message;
+          $('retry').hidden = false;
+          $('play').disabled = true;
+        }
+        function material(color) {
+          return new T.MeshLambertMaterial({ color });
+        }
+        const textureCache = {};
+        function texture(kind) {
+          if (textureCache[kind]) return textureCache[kind];
+          const el = document.createElement('canvas');
+          el.width = el.height = 128;
+          const ctx = el.getContext('2d'),
+            random = (() => {
+              let s = kind.length * 67;
+              return () => {
+                s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+                return s / 4294967296;
+              };
+            })();
+          ctx.fillStyle =
+            {
+              sand: '#c8aa77',
+              brick: '#ac8b61',
+              wood: '#8b643e',
+              metal: '#707972',
+              ground: '#c8b284',
+            }[kind] || '#bba174';
+          ctx.fillRect(0, 0, 128, 128);
+          if (kind === 'brick' || kind === 'sand') {
+            ctx.strokeStyle = '#6a503b33';
+            ctx.lineWidth = 3;
+            for (let row = 0; row < 4; row++) {
+              ctx.beginPath();
+              ctx.moveTo(0, row * 32);
+              ctx.lineTo(128, row * 32);
+              ctx.stroke();
+              for (let col = -1; col < 5; col++) {
+                const x = col * 48 + (row % 2) * 24;
+                ctx.beginPath();
+                ctx.moveTo(x, row * 32);
+                ctx.lineTo(x, row * 32 + 32);
+                ctx.stroke();
+              }
+            }
+          }
+          if (kind === 'wood') {
+            ctx.strokeStyle = '#39291c70';
+            ctx.lineWidth = 3;
+            for (let x = 0; x < 128; x += 21) {
+              ctx.beginPath();
+              ctx.moveTo(x, 0);
+              ctx.lineTo(x, 128);
+              ctx.stroke();
+            }
+            ctx.strokeStyle = '#c2945e';
+            ctx.lineWidth = 12;
+            ctx.strokeRect(6, 6, 116, 116);
+            ctx.beginPath();
+            ctx.moveTo(12, 116);
+            ctx.lineTo(116, 12);
+            ctx.stroke();
+          }
+          if (kind === 'metal') {
+            ctx.strokeStyle = '#232e3044';
+            ctx.lineWidth = 2;
+            for (let x = 0; x < 128; x += 32) {
+              ctx.beginPath();
+              ctx.moveTo(x, 0);
+              ctx.lineTo(x, 128);
+              ctx.stroke();
+            }
+            ctx.fillStyle = '#e0dbc0';
+            for (let x = 12; x < 128; x += 32)
+              for (let y = 12; y < 128; y += 32) ctx.fillRect(x, y, 3, 3);
+          }
+          for (let i = 0; i < 600; i++) {
+            const v = random();
+            ctx.fillStyle = v > 0.5 ? '#fff6db12' : '#2b2e2310';
+            ctx.fillRect(random() * 128, random() * 128, 1 + random() * 3, 1 + random() * 2);
+          }
+          const out = new T.CanvasTexture(el);
+          out.encoding = T.sRGBEncoding;
+          out.wrapS = out.wrapT = T.RepeatWrapping;
+          out.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
+          textureCache[kind] = out;
+          return out;
+        }
+        function textured(kind, w = 1, d = 1) {
+          const map = texture(kind).clone();
+          map.needsUpdate = true;
+          map.repeat.set(Math.max(1, w / 3), Math.max(1, d / 3));
+          return new T.MeshLambertMaterial({ map });
+        }
+        function box(parent, x, y, z, w, h, d, mat, shadow = true) {
+          const mesh = new T.Mesh(new T.BoxGeometry(w, h, d), mat);
+          mesh.position.set(x, y, z);
+          mesh.castShadow = shadow;
+          mesh.receiveShadow = true;
+          parent.add(mesh);
+          return mesh;
+        }
+        function label(text, color = '#f5dc9f', scale = 1) {
+          const el = document.createElement('canvas');
+          el.width = 512;
+          el.height = 128;
+          const ctx = el.getContext('2d');
+          ctx.fillStyle = '#162329d9';
+          ctx.fillRect(0, 0, 512, 128);
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 5;
+          ctx.strokeRect(7, 7, 498, 114);
+          ctx.fillStyle = color;
+          ctx.font = 'bold 58px system-ui';
+          ctx.textAlign = 'center';
+          ctx.fillText(text, 256, 84);
+          const sprite = new T.Sprite(
+            new T.SpriteMaterial({ map: new T.CanvasTexture(el), depthWrite: false }),
+          );
+          sprite.scale.set(8 * scale, 2 * scale, 1);
+          return sprite;
+        }
+        function buildMap() {
+          scene.background = new T.Color('#9bbac6');
+          scene.fog = new T.Fog('#c3baa0', 35, 120);
+          scene.add(new T.HemisphereLight('#e2f5ff', '#8b7050', 0.7));
+          const sun = new T.DirectionalLight('#ffdfad', 0.8);
+          sun.position.set(-35, 60, 25);
+          sun.castShadow = true;
+          sun.shadow.mapSize.set(512, 512);
+          Object.assign(sun.shadow.camera, {
+            left: -55,
+            right: 55,
+            top: 55,
+            bottom: -55,
+            near: 1,
+            far: 140,
+          });
+          sun.shadow.camera.updateProjectionMatrix();
+          sun.shadow.bias = -0.001;
+          scene.add(sun);
+          const ground = new T.Mesh(new T.PlaneGeometry(100, 100), textured('ground', 100, 100));
+          ground.rotation.x = -Math.PI / 2;
+          ground.receiveShadow = true;
+          scene.add(ground);
+          for (const b of world.boxes)
+            box(scene, b.x, b.y, b.z, b.w, b.h, b.d, textured(b.material, b.w, b.d));
+          for (const s of world.surfaces)
+            box(scene, s.x, s.y / 2, s.z, s.w, s.y, s.d, textured('sand', s.w, s.d));
+          for (const r of world.ramps) {
+            const x0 = r.x - r.w / 2,
+              x1 = r.x + r.w / 2,
+              z0 = r.z - r.d / 2,
+              z1 = r.z + r.d / 2;
+            const geo = new T.BufferGeometry();
+            geo.setAttribute(
+              'position',
+              new T.Float32BufferAttribute(
+                [
+                  x0,
+                  r.high,
+                  z0,
+                  x0,
+                  r.low,
+                  z1,
+                  x1,
+                  r.low,
+                  z1,
+                  x0,
+                  r.high,
+                  z0,
+                  x1,
+                  r.low,
+                  z1,
+                  x1,
+                  r.high,
+                  z0,
+                ],
+                3,
+              ),
+            );
+            geo.computeVertexNormals();
+            const mesh = new T.Mesh(
+              geo,
+              new T.MeshLambertMaterial({ color: '#c2a477', side: T.DoubleSide }),
+            );
+            mesh.receiveShadow = true;
+            scene.add(mesh);
+          }
+          for (const site of C.SITES) {
+            const y = C.floorAt(world, site.x, site.z) + 0.025,
+              ring = new T.Mesh(
+                new T.PlaneGeometry(site.w, site.d),
+                new T.MeshBasicMaterial({
+                  color: site.name === 'A' ? '#d49851' : '#79a7a0',
+                  transparent: true,
+                  opacity: 0.3,
+                  side: T.DoubleSide,
+                  depthWrite: false,
+                }),
+              );
+            ring.position.set(site.x, y, site.z);
+            ring.rotation.x = -Math.PI / 2;
+            scene.add(ring);
+            const outline = new T.LineLoop(
+              new T.BufferGeometry().setFromPoints([
+                new T.Vector3(-site.w / 2, 0, -site.d / 2),
+                new T.Vector3(site.w / 2, 0, -site.d / 2),
+                new T.Vector3(site.w / 2, 0, site.d / 2),
+                new T.Vector3(-site.w / 2, 0, site.d / 2),
+              ]),
+              new T.LineBasicMaterial({ color: '#f4d490' }),
+            );
+            outline.position.set(site.x, y + 0.02, site.z);
+            scene.add(outline);
+            const sign = label(`SITE ${site.name}`);
+            sign.position.set(site.x, 5.5, site.z - 6);
+            scene.add(sign);
+          }
+          for (const [text, x, z] of [
+            ['LONG A', 32, 6],
+            ['SHORT A', 20, -4],
+            ['MID DOORS', 0, -8],
+            ['B TUNNELS', -31, 5],
+            ['T SPAWN', 0, 39],
+            ['CT SPAWN', 0, -40],
+          ]) {
+            const s = label(text, '#e8d3a5', 0.65);
+            s.position.set(x, 4, z);
+            scene.add(s);
+          }
+          // Architectural trim, rooftop silhouettes and a small original courtyard facade.
+          for (const x of [-43, 43])
+            for (let z = -36; z < 38; z += 12) {
+              box(scene, x, 7.8, z, 1.5, 2, 4, material('#aa9066'));
+              box(scene, x, 5, z, 0.12, 1.7, 1.1, material('#566b69'));
+            }
+          for (const x of [-10, 10]) box(scene, x, 1.4, 36, 1, 2.8, 1, material('#ad8b60'));
+          const bomb = new T.Group();
+          box(bomb, 0, 0.12, 0, 0.48, 0.24, 0.32, material('#596148'));
+          box(bomb, 0, 0.25, 0, 0.25, 0.035, 0.18, material('#243532'));
+          box(
+            bomb,
+            0.1,
+            0.28,
+            -0.03,
+            0.055,
+            0.035,
+            0.055,
+            new T.MeshBasicMaterial({ color: '#fa7c42' }),
+          );
+          scene.add(bomb);
+          bomb.visible = false;
+          return bomb;
+        }
+        function buildCharacter(a) {
+          const side = C.actorSide(g, a),
+            group = new T.Group(),
+            cloth = material(side === 'CT' ? '#547f8b' : '#af8856'),
+            dark = material('#324348'),
+            skin = material('#c6a17c');
+          const torso = box(group, 0, 1.11, 0, 0.57, 0.62, 0.34, cloth);
+          box(group, 0, 1.14, -0.19, 0.45, 0.45, 0.07, dark);
+          const head = new T.Mesh(new T.SphereGeometry(0.2, 8, 6), skin);
+          head.position.y = 1.65;
+          group.add(head);
+          box(group, 0, 1.77, 0, 0.43, 0.13, 0.39, dark);
+          if (side === 'T') box(group, 0, 1.51, -0.18, 0.36, 0.15, 0.08, cloth);
+          const leftLeg = box(group, -0.16, 0.37, 0, 0.22, 0.7, 0.23, dark),
+            rightLeg = box(group, 0.16, 0.37, 0, 0.22, 0.7, 0.23, dark),
+            leftArm = box(group, -0.39, 1.08, -0.08, 0.18, 0.56, 0.18, cloth),
+            rightArm = box(group, 0.39, 1.08, -0.08, 0.18, 0.56, 0.18, cloth);
+          leftArm.rotation.x = -0.8;
+          rightArm.rotation.x = -0.8;
+          const rifle = box(group, 0.19, 1.1, -0.46, 0.1, 0.1, 0.65, material('#293739'));
+          const muzzle = new T.Mesh(
+            new T.ConeGeometry(0.08, 0.24, 5),
+            new T.MeshBasicMaterial({ color: '#ffe6a2' }),
+          );
+          muzzle.rotation.x = -Math.PI / 2;
+          muzzle.position.set(0.19, 1.1, -0.88);
+          group.add(muzzle);
+          muzzle.visible = false;
+          const marker = new T.Mesh(
+            new T.RingGeometry(0.38, 0.46, 16),
+            new T.MeshBasicMaterial({
+              color: a.faction === 0 ? '#94cbd9' : '#d6ac69',
+              side: T.DoubleSide,
+              transparent: true,
+              opacity: 0.5,
+            }),
+          );
+          marker.rotation.x = -Math.PI / 2;
+          marker.position.y = 0.025;
+          group.add(marker);
+          scene.add(group);
+          return {
+            group,
+            torso,
+            head,
+            leftLeg,
+            rightLeg,
+            leftArm,
+            rightArm,
+            rifle,
+            muzzle,
+            marker,
+          };
+        }
+        function disposeGroup(group) {
+          group.traverse((o) => {
+            if (o.geometry) o.geometry.dispose();
+            if (o.material) {
+              const mats = Array.isArray(o.material) ? o.material : [o.material];
+              for (const m of mats) m.dispose();
+            }
+          });
+          group.parent?.remove(group);
+        }
+        function rebuildCharacters() {
+          for (const c of characters.values()) disposeGroup(c.group);
+          characters.clear();
+          for (const a of g.actors) characters.set(a.id, buildCharacter(a));
+        }
+        function buildGun(key) {
+          if (gunModel) disposeGroup(gunModel);
+          gunModel = new T.Group();
+          gunKey = key;
+          const steel = material('#344246'),
+            black = material('#222e32'),
+            wood = material('#8e6a43'),
+            skin = material('#bd936e');
+          if (key === 'knife') {
+            box(gunModel, 0, 0, -0.1, 0.045, 0.06, 0.38, material('#b9c5c5'));
+            box(gunModel, 0, -0.01, 0.13, 0.06, 0.07, 0.19, black);
+            box(gunModel, 0, 0, 0.035, 0.16, 0.03, 0.035, steel);
+          } else if (key === 'bomb') {
+            box(gunModel, 0, 0, 0, 0.3, 0.12, 0.22, material('#637352'));
+            box(gunModel, 0, 0.07, -0.02, 0.18, 0.025, 0.13, black);
+            box(
+              gunModel,
+              0.06,
+              0.09,
+              -0.02,
+              0.03,
+              0.018,
+              0.03,
+              new T.MeshBasicMaterial({ color: '#dd8047' }),
+            );
+          } else if (['he', 'flash', 'smoke'].includes(key)) {
+            const body = new T.Mesh(
+              new T.CylinderGeometry(0.065, 0.075, 0.15, 8),
+              material(key === 'he' ? '#738357' : key === 'flash' ? '#a0a798' : '#899378'),
+            );
+            gunModel.add(body);
+            box(gunModel, 0, 0.09, 0, 0.07, 0.045, 0.055, black);
+          } else {
+            const c = C.WEAPONS[key] || C.WEAPONS.usp,
+              pistol = c.slot === 'pistol',
+              length = pistol ? 0.3 : key === 'awp' ? 0.85 : 0.68;
+            box(gunModel, 0, 0, -0.12, 0.115, 0.13, length, steel);
+            box(gunModel, 0, -0.13, 0.07, 0.085, 0.24, 0.12, black);
+            box(
+              gunModel,
+              0,
+              -0.02,
+              0.22,
+              0.095,
+              0.1,
+              pistol ? 0.08 : 0.31,
+              key === 'ak47' ? wood : black,
+            );
+            box(gunModel, 0, 0.055, -length / 2, 0.045, 0.05, 0.15, black);
+            if (!pistol) {
+              box(gunModel, 0, -0.13, -0.15, 0.075, 0.24, 0.15, key === 'ak47' ? wood : black);
+              box(gunModel, 0, 0.03, -length * 0.65, 0.05, 0.05, 0.23, black);
+            }
+            if (key === 'awp') {
+              const scope = new T.Mesh(new T.CylinderGeometry(0.045, 0.045, 0.25, 8), black);
+              scope.rotation.x = Math.PI / 2;
+              scope.position.set(0, 0.14, -0.22);
+              gunModel.add(scope);
+              box(gunModel, 0, 0.07, -0.22, 0.035, 0.12, 0.035, steel);
+            }
+          }
+          box(gunModel, 0.055, -0.21, 0.12, 0.09, 0.14, 0.21, skin);
+          box(gunModel, 0.06, -0.27, 0.24, 0.13, 0.12, 0.31, material('#4b6c73'));
+          gunFlash = new T.Mesh(
+            new T.ConeGeometry(0.06, 0.2, 5),
+            new T.MeshBasicMaterial({ color: '#ffe6a2', transparent: true, opacity: 0.85 }),
+          );
+          gunFlash.rotation.x = -Math.PI / 2;
+          gunFlash.position.set(
+            0,
+            0.025,
+            C.WEAPONS[key]?.slot === 'pistol' ? -0.4 : key === 'awp' ? -0.8 : -0.66,
+          );
+          gunFlash.visible = false;
+          gunModel.add(gunFlash);
+          gunModel.position.set(0.27, -0.26, -0.56);
+          weaponScene.add(gunModel);
+        }
+        // Fixed pools: tracers, impact decals, particles and ejected shell casings.
+        const pools = { tracers: [], decals: [], particles: [], shells: [] };
+        let tracerIndex = 0,
+          decalIndex = 0,
+          particleIndex = 0,
+          shellIndex = 0;
+        function makePools() {
+          for (let i = 0; i < 24; i++) {
+            const geo = new T.BufferGeometry();
+            geo.setAttribute('position', new T.BufferAttribute(new Float32Array(6), 3));
+            const mesh = new T.Line(
+              geo,
+              new T.LineBasicMaterial({ color: '#ffe2a2', transparent: true, opacity: 0.65 }),
+            );
+            mesh.visible = false;
+            scene.add(mesh);
+            pools.tracers.push({ mesh, time: 0 });
+          }
+          const decalGeo = new T.CircleGeometry(0.065, 6),
+            particleGeo = new T.BoxGeometry(0.04, 0.04, 0.04),
+            shellGeo = new T.CylinderGeometry(0.018, 0.018, 0.055, 5);
+          for (let i = 0; i < 64; i++) {
+            const mesh = new T.Mesh(
+              decalGeo,
+              new T.MeshBasicMaterial({
+                color: '#382e24',
+                transparent: true,
+                opacity: 0.75,
+                depthWrite: false,
+                polygonOffset: true,
+                polygonOffsetFactor: -2,
+              }),
+            );
+            mesh.visible = false;
+            scene.add(mesh);
+            pools.decals.push({ mesh, time: 0 });
+          }
+          for (let i = 0; i < 100; i++) {
+            const mesh = new T.Mesh(particleGeo, new T.MeshBasicMaterial({ color: '#c96548' }));
+            mesh.visible = false;
+            scene.add(mesh);
+            pools.particles.push({ mesh, time: 0, vel: new T.Vector3() });
+          }
+          for (let i = 0; i < 32; i++) {
+            const mesh = new T.Mesh(shellGeo, material('#c6a04f'));
+            mesh.visible = false;
+            scene.add(mesh);
+            pools.shells.push({ mesh, time: 0, vel: new T.Vector3() });
+          }
+        }
+        function particles(p, color, count = 8, force = 3) {
+          for (let i = 0; i < count; i++) {
+            const s = pools.particles[particleIndex++ % pools.particles.length];
+            s.time = 0.3 + Math.random() * 0.5;
+            s.mesh.visible = true;
+            s.mesh.position.set(p.x, p.y, p.z);
+            s.mesh.material.color.set(color);
+            s.vel.set(
+              (Math.random() - 0.5) * force,
+              Math.random() * force,
+              (Math.random() - 0.5) * force,
+            );
+          }
+        }
+        function shotEffect(e) {
+          const line = pools.tracers[tracerIndex++ % pools.tracers.length],
+            arr = line.mesh.geometry.attributes.position.array;
+          arr.set([e.origin.x, e.origin.y, e.origin.z, e.pos.x, e.pos.y, e.pos.z]);
+          line.mesh.geometry.attributes.position.needsUpdate = true;
+          line.mesh.geometry.computeBoundingSphere();
+          line.mesh.visible = true;
+          line.time = 0.055;
+          if (e.weapon !== 'knife') {
+            const shell = pools.shells[shellIndex++ % pools.shells.length];
+            shell.mesh.position.set(e.origin.x + 0.2, e.origin.y - 0.2, e.origin.z);
+            shell.vel.set(Math.random() * 2 + 1, 2, Math.random() - 1);
+            shell.mesh.visible = true;
+            shell.time = 0.85;
+          }
+        }
+        function impact(e) {
+          const d = pools.decals[decalIndex++ % pools.decals.length];
+          d.mesh.position.set(
+            e.pos.x + e.normal.x * 0.015,
+            e.pos.y + e.normal.y * 0.015,
+            e.pos.z + e.normal.z * 0.015,
+          );
+          d.mesh.quaternion.setFromUnitVectors(
+            new T.Vector3(0, 0, 1),
+            new T.Vector3(e.normal.x, e.normal.y, e.normal.z),
+          );
+          d.mesh.visible = true;
+          d.time = 28;
+          particles(e.pos, '#d9bc83', 3, 1.6);
+        }
+        function updatePools(dt) {
+          for (const s of [...pools.tracers, ...pools.decals]) {
+            if (s.time > 0) {
+              s.time -= dt;
+              if (s.time <= 0) s.mesh.visible = false;
+            }
+          }
+          for (const s of [...pools.particles, ...pools.shells])
+            if (s.time > 0) {
+              s.time -= dt;
+              s.vel.y -= 8 * dt;
+              s.mesh.position.addScaledVector(s.vel, dt);
+              s.mesh.rotation.x += dt * 4;
+              s.mesh.rotation.z += dt * 6;
+              if (s.time <= 0 || s.mesh.position.y < 0) s.mesh.visible = false;
+            }
+        }
+        function clearEffects() {
+          for (const pool of Object.values(pools))
+            for (const s of pool) {
+              s.time = 0;
+              s.mesh.visible = false;
+            }
+          for (const obj of smokeMeshes.values()) disposeGroup(obj.group);
+          smokeMeshes.clear();
+          for (const mesh of grenadeMeshes.values()) disposeGroup(mesh);
+          grenadeMeshes.clear();
+        }
+        // Audio: synthesized output only; positional sources use a native Web Audio panner.
+        const Audio = {
+          context: null,
+          master: null,
+          noise: null,
+          init() {
+            if (this.context) {
+              this.context.resume().catch(() => {});
+              return;
+            }
+            const Context = window.AudioContext || window.webkitAudioContext;
+            if (!Context) return;
+            try {
+              this.context = new Context();
+              this.master = this.context.createGain();
+              this.master.gain.value = settings.volume;
+              this.master.connect(this.context.destination);
+              this.noise = this.context.createBuffer(
+                1,
+                this.context.sampleRate * 0.6,
+                this.context.sampleRate,
+              );
+              const data = this.noise.getChannelData(0);
+              for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+            } catch {
+              this.context = null;
+            }
+          },
+          tone(freq, duration = 0.1, volume = 0.1, pos = null, kind = 'sine', noise = false) {
+            const ctx = this.context;
+            if (!ctx || ctx.state === 'suspended' || settings.volume === 0) return;
+            const gain = ctx.createGain(),
+              source = noise ? ctx.createBufferSource() : ctx.createOscillator();
+            if (noise) source.buffer = this.noise;
+            else {
+              source.type = kind;
+              source.frequency.setValueAtTime(freq, ctx.currentTime);
+              source.frequency.exponentialRampToValueAtTime(
+                Math.max(30, freq * 0.5),
+                ctx.currentTime + duration,
+              );
+            }
+            gain.gain.setValueAtTime(volume, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+            let dest = this.master;
+            if (pos) {
+              const panner = ctx.createPanner();
+              panner.panningModel = 'equalpower';
+              panner.distanceModel = 'inverse';
+              panner.refDistance = 3;
+              panner.maxDistance = 80;
+              panner.rolloffFactor = 0.8;
+              panner.setPosition(pos.x, pos.y, pos.z);
+              panner.connect(this.master);
+              dest = panner;
+              source.onended = () => {
+                source.disconnect();
+                gain.disconnect();
+                panner.disconnect();
+              };
+            } else
+              source.onended = () => {
+                source.disconnect();
+                gain.disconnect();
+              };
+            source.connect(gain);
+            gain.connect(dest);
+            source.start();
+            source.stop(ctx.currentTime + duration);
+          },
+          cue(type, pos = null, weapon = 'usp') {
+            if (type === 'shot') {
+              const c = C.WEAPONS[weapon],
+                heavy = c?.slot === 'sniper' || c?.slot === 'shotgun';
+              const signature = {
+                knife: 900,
+                usp: 340,
+                glock: 420,
+                deagle: 130,
+                mp5: 560,
+                ak47: 115,
+                m4a1: 180,
+                awp: 65,
+                shotgun: 85,
+              };
+              this.tone(
+                signature[weapon] || 150,
+                0.08,
+                heavy ? 0.3 : 0.13,
+                pos,
+                weapon === 'knife' ? 'sine' : 'triangle',
+              );
+              this.tone(1000, heavy ? 0.24 : 0.075, heavy ? 0.35 : 0.18, pos, 'sine', true);
+            } else if (type === 'footstep') this.tone(200, 0.045, 0.035, pos, 'sine', true);
+            else if (type === 'beep') this.tone(1250, 0.065, 0.09, pos);
+            else if (type === 'explosion') {
+              this.tone(65, 0.6, 0.45, pos, 'sawtooth');
+              this.tone(700, 0.5, 0.3, pos, 'sine', true);
+            } else if (type === 'reload') {
+              this.tone(850, 0.08, 0.05, pos, 'sine', true);
+              this.tone(240, 0.15, 0.05, pos, 'triangle');
+            } else if (type === 'flash') this.tone(1800, 0.8, 0.04, pos);
+            else if (type === 'bounce') this.tone(360, 0.04, 0.06, pos, 'triangle');
+            else if (type === 'win') {
+              const base = weapon === 'CT' ? 246 : 196;
+              this.tone(base, 0.4, 0.09, null, 'sawtooth');
+              this.tone(base * 1.5, 0.6, 0.06);
+              this.tone(base * 2, 0.8, 0.04);
+            } else if (type === 'defuse' || type === 'plant') {
+              this.tone(740, 0.15, 0.08, pos);
+              this.tone(990, 0.3, 0.05, pos);
+            } else this.tone(620, 0.09, 0.04, pos, 'triangle');
+          },
+          listen(view) {
+            const ctx = this.context;
+            if (!ctx || !view) return;
+            const p = C.eye(view),
+              d = C.direction(view.yaw, view.pitch),
+              l = ctx.listener;
+            if (l.positionX) {
+              l.positionX.value = p.x;
+              l.positionY.value = p.y;
+              l.positionZ.value = p.z;
+              l.forwardX.value = d.x;
+              l.forwardY.value = d.y;
+              l.forwardZ.value = d.z;
+              l.upX.value = 0;
+              l.upY.value = 1;
+              l.upZ.value = 0;
+            } else {
+              l.setPosition(p.x, p.y, p.z);
+              l.setOrientation(d.x, d.y, d.z, 0, 1, 0);
+            }
+          },
+          pause(value) {
+            if (!this.context) return;
+            if (value) this.context.suspend().catch(() => {});
+            else this.context.resume().catch(() => {});
+          },
+        };
+        let bombMesh;
+        try {
+          renderer = new T.WebGLRenderer({
+            canvas,
+            antialias: true,
+            powerPreference: 'high-performance',
+          });
+          renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
+          renderer.shadowMap.enabled = true;
+          renderer.shadowMap.type = T.PCFSoftShadowMap;
+          renderer.outputEncoding = T.sRGBEncoding;
+          scene = new T.Scene();
+          camera = new T.PerspectiveCamera(settings.fov, innerWidth / innerHeight, 0.05, 160);
+          camera.rotation.order = 'YXZ';
+          weaponScene = new T.Scene();
+          weaponScene.add(new T.HemisphereLight('#f1f2de', '#475751', 1.7));
+          weaponCamera = new T.PerspectiveCamera(65, innerWidth / innerHeight, 0.01, 10);
+          bombMesh = buildMap();
+          makePools();
+          ready = true;
+          $('loading').hidden = true;
+          $('menu-status').textContent = 'Arena ready. Choose your side and difficulty.';
+          post('ready');
+        } catch (error) {
+          fail('WebGL is unavailable. Enable browser hardware acceleration, then reload.');
+          return;
+        }
+        // Input: pointer lock on desktop, drag-to-look fallback, and touch joystick/buttons.
+        function clearInput() {
+          keys.clear();
+          pressed.clear();
+          mouse.fire = mouse.firePressed = false;
+          touch.fire = touch.use = touch.jump = touch.crouch = false;
+          stick.x = stick.y = 0;
+          $('stick-thumb').style.transform = '';
+        }
+        function locked() {
+          return document.pointerLockElement === canvas;
+        }
+        function release(reason) {
+          unlockReason = reason;
+          if (locked()) document.exitPointerLock();
+        }
+        function capture() {
+          canvas.focus();
+          if (!settings.touch && !locked()) {
+            try {
+              const p = canvas.requestPointerLock();
+              if (p?.catch)
+                p.catch(() => {
+                  $('announcement').textContent =
+                    'Drag the view to aim, or click to capture the mouse.';
+                });
+            } catch {
+              $('announcement').textContent = 'Drag the view to aim.';
+            }
+          }
+        }
+        function setPause(value, external = false) {
+          if (external) externalPaused = value;
+          else localPaused = value;
+          clearInput();
+          if (g) g.paused = localPaused || externalPaused;
+          Audio.pause(localPaused || externalPaused);
+          if (value) release(external ? 'external' : 'pause');
+          $('pause-menu').hidden = !localPaused || externalPaused;
+          if (!value && !externalPaused && !localPaused && playing) {
+            lastTime = 0;
+            accumulator = 0;
+            capture();
+          }
+        }
+        function openBuy() {
+          if (!playing || !g || g.phase !== 'freeze' || !g.actors[0].alive) {
+            if (g) C.grant(g.actors[0], 0);
+            return;
+          }
+          buyOpen = true;
+          buyCategory = null;
+          clearInput();
+          release('buy');
+          $('buy-menu').hidden = false;
+          renderBuy();
+        }
+        function closeBuy() {
+          buyOpen = false;
+          $('buy-menu').hidden = true;
+          if (playing && !localPaused && !externalPaused) capture();
+        }
+        const categories = [
+          ['Pistols', ['usp', 'glock', 'deagle']],
+          ['SMGs', ['mp5']],
+          ['Rifles', ['ak47', 'm4a1']],
+          ['Sniper rifles', ['awp']],
+          ['Shotguns', ['shotgun']],
+          ['Equipment', ['kevlar', 'helmet', 'kit']],
+          ['Grenades', ['he', 'flash', 'smoke']],
+        ];
+        let visibleBuy = [];
+        function renderBuy() {
+          if (!g) return;
+          const a = g.actors[0],
+            items = $('buy-items');
+          items.replaceChildren();
+          $('buy-money').textContent = `$${a.money}`;
+          $('buy-title').textContent =
+            buyCategory === null ? 'Buy menu' : categories[buyCategory][0];
+          visibleBuy =
+            buyCategory === null
+              ? categories.map((_, i) => i)
+              : categories[buyCategory][1].filter(
+                  (k) =>
+                    !(C.WEAPONS[k] || C.UTILITY[k]).side ||
+                    (C.WEAPONS[k] || C.UTILITY[k]).side === C.actorSide(g, a),
+                );
+          visibleBuy.forEach((key, i) => {
+            const button = document.createElement('button'),
+              title = document.createElement('span'),
+              price = document.createElement('small');
+            if (buyCategory === null) {
+              title.textContent = `${i + 1}. ${categories[key][0]}`;
+              price.textContent = '→';
+              button.onclick = () => {
+                buyCategory = key;
+                $('buy-note').textContent = '';
+                renderBuy();
+              };
+            } else {
+              const config = C.WEAPONS[key] || C.UTILITY[key];
+              title.textContent = `${i + 1}. ${config.name}`;
+              price.textContent = `$${config.price}`;
+              button.setAttribute('aria-label', `Buy ${config.name} for $${config.price}`);
+              button.onclick = () => purchase(key);
+            }
+            button.append(title, price);
+            items.append(button);
+          });
+          $('buy-back').disabled = buyCategory === null;
+        }
+        function purchase(key) {
+          const result = C.buy(g, g.actors[0], key);
+          $('buy-note').textContent = result.message;
+          renderBuy();
+          updateHud();
+        }
+        function buyNumber(n) {
+          if (n === 0) {
+            if (buyCategory === null) closeBuy();
+            else {
+              buyCategory = null;
+              renderBuy();
+            }
+            return;
+          }
+          const key = visibleBuy[n - 1];
+          if (key === undefined) return;
+          if (buyCategory === null) {
+            buyCategory = key;
+            renderBuy();
+          } else purchase(key);
+        }
+        function weaponSlot(n) {
+          if (!g) return;
+          const a = g.actors[0];
+          if (n === 1) {
+            const key = Object.keys(a.weapons).find(
+              (k) => !['knife', 'pistol'].includes(C.WEAPONS[k].slot),
+            );
+            if (key) C.equip(a, key);
+          } else if (n === 2) {
+            const key = Object.keys(a.weapons).find((k) => C.WEAPONS[k].slot === 'pistol');
+            if (key) C.equip(a, key);
+          } else if (n === 3) C.equip(a, 'knife');
+          else if (n === 4) {
+            const options = ['he', 'flash', 'smoke'].filter((k) => a.utility[k] > 0),
+              index = options.indexOf(a.active);
+            if (options.length) C.equip(a, options[(index + 1) % options.length]);
+          } else if (n === 5 && g.bomb.owner === 0) C.equip(a, 'bomb');
+        }
+        function cycleWeapon() {
+          if (!g) return;
+          const a = g.actors[0],
+            list = [
+              ...Object.keys(a.weapons),
+              ...Object.keys(a.utility).filter((k) => a.utility[k]),
+            ];
+          C.equip(a, list[(list.indexOf(a.active) + 1) % list.length]);
+        }
+        function scope() {
+          if (!g) return;
+          const a = g.actors[0];
+          if (C.WEAPONS[a.active]?.scope && !a.weapons[a.active].reload)
+            a.scope = (a.scope + 1) % 3;
+        }
+        window.addEventListener('keydown', (e) => {
+          if (e.target instanceof HTMLElement && e.target.closest('input,select,textarea')) return;
+          if (e.code === 'Escape') {
+            if (buyOpen) closeBuy();
+            else if (playing) setPause(true);
+            return;
+          }
+          if (!playing || externalPaused || localPaused) return;
+          if (e.code === 'Tab') {
+            e.preventDefault();
+            scoreHeld = true;
+            renderScoreboard();
+            return;
+          }
+          if (e.code === settings.bindings.buy && !e.repeat) {
+            e.preventDefault();
+            buyOpen ? closeBuy() : openBuy();
+            return;
+          }
+          if (buyOpen) {
+            if (/^Digit[0-9]$/.test(e.code)) {
+              e.preventDefault();
+              buyNumber(Number(e.code.slice(-1)));
+            }
+            return;
+          }
+          if (
+            [
+              'Space',
+              'ArrowUp',
+              'ArrowDown',
+              'ArrowLeft',
+              'ArrowRight',
+              'ControlLeft',
+              'ControlRight',
+            ].includes(e.code)
+          )
+            e.preventDefault();
+          keys.add(e.code);
+          if (!e.repeat) pressed.add(e.code);
+          if (/^Digit[1-5]$/.test(e.code)) weaponSlot(Number(e.code.slice(-1)));
+          if (e.code === 'KeyQ' && !e.repeat) C.equip(g.actors[0], g.actors[0].previous);
+          if (e.code === 'KeyG' && !e.repeat) C.dropBomb(g, g.actors[0]);
+          if (e.code === settings.bindings.jump && !g.actors[0].alive && !e.repeat) nextSpectator();
+        });
+        window.addEventListener('keyup', (e) => {
+          keys.delete(e.code);
+          if (e.code === 'Tab') {
+            scoreHeld = false;
+            renderScoreboard();
+          }
+        });
+        window.addEventListener('blur', clearInput);
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden && playing) setPause(true);
+        });
+        document.addEventListener('pointerlockchange', () => {
+          if (!locked()) {
+            clearInput();
+            if (unlockReason) {
+              unlockReason = '';
+              return;
+            }
+            if (playing && !buyOpen && g.phase !== 'finished') setPause(true);
+          } else unlockReason = '';
+        });
+        document.addEventListener('pointerlockerror', () => {
+          if (playing)
+            $('announcement').textContent = 'Mouse capture unavailable. Drag the view to aim.';
+        });
+        document.addEventListener('mousemove', (e) => {
+          if (locked() && playing && !localPaused && !externalPaused && !buyOpen)
+            look(e.movementX, e.movementY);
+        });
+        function look(dx, dy) {
+          if (!g || !g.actors[0].alive) return;
+          const a = g.actors[0],
+            scale = settings.sensitivity * 0.0022 * (a.scope ? (a.scope === 2 ? 0.25 : 0.45) : 1);
+          a.yaw -= dx * scale;
+          a.pitch = C.clamp(a.pitch - dy * scale, -1.45, 1.45);
+        }
+        let drag = null;
+        canvas.addEventListener('pointerdown', (e) => {
+          if (!playing || localPaused || externalPaused || buyOpen) return;
+          canvas.focus();
+          if (e.button === 2) {
+            scope();
+            return;
+          }
+          if (e.pointerType === 'mouse' && locked()) {
+            mouse.fire = true;
+            mouse.firePressed = true;
+            return;
+          }
+          if (e.pointerType === 'mouse' && !settings.touch) capture();
+          drag = { id: e.pointerId, x: e.clientX, y: e.clientY };
+          canvas.setPointerCapture(e.pointerId);
+        });
+        canvas.addEventListener('pointermove', (e) => {
+          if (drag?.id === e.pointerId && !locked() && !localPaused && !externalPaused) {
+            look(e.clientX - drag.x, e.clientY - drag.y);
+            drag.x = e.clientX;
+            drag.y = e.clientY;
+          }
+        });
+        canvas.addEventListener('pointerup', () => {
+          mouse.fire = false;
+          drag = null;
+        });
+        canvas.addEventListener('pointercancel', () => {
+          mouse.fire = false;
+          drag = null;
+        });
+        canvas.addEventListener('lostpointercapture', () => {
+          drag = null;
+          mouse.fire = false;
+        });
+        canvas.addEventListener('mousedown', (e) => {
+          if (locked() && e.button === 0 && playing) {
+            mouse.fire = true;
+            mouse.firePressed = true;
+          }
+        });
+        window.addEventListener('mouseup', () => (mouse.fire = false));
+        canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+        canvas.addEventListener(
+          'wheel',
+          (e) => {
+            if (playing && !buyOpen) {
+              e.preventDefault();
+              cycleWeapon();
+            }
+          },
+          { passive: false },
+        );
+        const joystick = $('stick');
+        function stickMove(e) {
+          const box = joystick.getBoundingClientRect(),
+            dx = e.clientX - box.left - box.width / 2,
+            dy = e.clientY - box.top - box.height / 2,
+            len = Math.hypot(dx, dy),
+            scale = Math.min(1, 35 / (len || 1));
+          stick.x = C.clamp(dx / 35, -1, 1);
+          stick.y = C.clamp(-dy / 35, -1, 1);
+          $('stick-thumb').style.transform = `translate(${dx * scale}px,${dy * scale}px)`;
+        }
+        joystick.addEventListener('pointerdown', (e) => {
+          joystick.setPointerCapture(e.pointerId);
+          stickMove(e);
+        });
+        joystick.addEventListener('pointermove', (e) => {
+          if (joystick.hasPointerCapture(e.pointerId)) stickMove(e);
+        });
+        for (const name of ['pointerup', 'pointercancel', 'lostpointercapture'])
+          joystick.addEventListener(name, () => {
+            stick.x = stick.y = 0;
+            $('stick-thumb').style.transform = '';
+          });
+        for (const button of document.querySelectorAll('[data-action]')) {
+          const action = button.dataset.action;
+          button.addEventListener('pointerdown', (e) => {
+            if (!playing || buyOpen || localPaused || externalPaused) return;
+            e.preventDefault();
+            button.setPointerCapture(e.pointerId);
+            if (action === 'fire') {
+              touch.fire = true;
+              mouse.firePressed = true;
+            } else if (action === 'use' || action === 'crouch') touch[action] = true;
+            else if (action === 'jump') {
+              if (g.actors[0].alive) touch.jump = true;
+              else nextSpectator();
+            } else if (action === 'reload') pressed.add(settings.bindings.reload);
+            else if (action === 'scope') scope();
+            else if (action === 'weapon') cycleWeapon();
+            else if (action === 'grenade') weaponSlot(4);
+          });
+          for (const name of ['pointerup', 'pointercancel', 'lostpointercapture'])
+            button.addEventListener(name, () => {
+              if (action === 'fire' || action === 'use' || action === 'crouch')
+                touch[action] = false;
+            });
+          button.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              if (action === 'fire') mouse.firePressed = true;
+              if (action === 'reload') pressed.add(settings.bindings.reload);
+            }
+          });
+        }
+        function input() {
+          if (buyOpen || scoreToggle) return C.controls();
+          const a = g.actors[0],
+            held = (...codes) => codes.some((c) => keys.has(c));
+          if (held('ArrowLeft')) a.yaw += C.DT * 1.8;
+          if (held('ArrowRight')) a.yaw -= C.DT * 1.8;
+          return {
+            forward: C.clamp(
+              Number(held('KeyW', 'ArrowUp')) - Number(held('KeyS', 'ArrowDown')) + stick.y,
+              -1,
+              1,
+            ),
+            strafe: C.clamp(Number(held('KeyD')) - Number(held('KeyA')) + stick.x, -1, 1),
+            jump: pressed.has(settings.bindings.jump) || touch.jump,
+            crouch: held('ControlLeft', 'ControlRight') || touch.crouch,
+            walk: held('ShiftLeft', 'ShiftRight'),
+            fire: mouse.fire || touch.fire,
+            firePressed: mouse.firePressed,
+            reload: pressed.has(settings.bindings.reload),
+            use: held(settings.bindings.use) || touch.use,
+          };
+        }
+        function resize() {
+          renderer.setSize(innerWidth, innerHeight, false);
+          camera.aspect = weaponCamera.aspect = innerWidth / innerHeight;
+          camera.updateProjectionMatrix();
+          weaponCamera.updateProjectionMatrix();
+          document.body.classList.toggle('mobile', settings.touch);
+          $('touch-controls').hidden = !playing || !settings.touch;
+        }
+        window.addEventListener('resize', resize);
+        $('touch-setting').checked = settings.touch;
+        function readSettings() {
+          settings.sensitivity = Number($('sensitivity').value);
+          settings.fov = Number($('fov').value);
+          settings.volume = Number($('volume').value);
+          settings.touch = $('touch-setting').checked;
+          for (const key of Object.keys(settings.bindings))
+            settings.bindings[key] = $(`bind-${key}`).value;
+          if (Audio.master) Audio.master.gain.value = settings.volume;
+          resize();
+        }
+        for (const id of ['sensitivity', 'fov', 'volume', 'touch-setting'])
+          $(id).addEventListener('input', () => {
+            readSettings();
+            $('sensitivity-value').textContent = settings.sensitivity.toFixed(1);
+            $('fov-value').textContent = `${settings.fov}°`;
+          });
+        function startMatch() {
+          readSettings();
+          if (
+            new Set(Object.values(settings.bindings)).size < Object.keys(settings.bindings).length
+          ) {
+            $('menu-status').textContent = 'Choose a different key for each action.';
+            return;
+          }
+          if (!ready) return;
+          Audio.init();
+          g = C.createGame($('side').value, $('difficulty').value, seed);
+          playing = true;
+          localPaused = false;
+          externalPaused = false;
+          buyOpen = false;
+          scoreHeld = scoreToggle = false;
+          accumulator = 0;
+          lastTime = 0;
+          lastScore = -1;
+          endedPosted = false;
+          spectating = 1;
+          clearInput();
+          clearEffects();
+          rebuildCharacters();
+          $('main-menu').hidden = true;
+          $('match-end').hidden = true;
+          $('pause-menu').hidden = true;
+          $('buy-menu').hidden = true;
+          $('hud').hidden = false;
+          $('utility-bar').hidden = false;
+          resize();
+          capture();
+          updateHud();
+          post('started');
+        }
+        function mainMenu() {
+          release('menu');
+          clearInput();
+          playing = false;
+          localPaused = false;
+          buyOpen = false;
+          scoreToggle = scoreHeld = false;
+          for (const id of [
+            'hud',
+            'match-end',
+            'pause-menu',
+            'buy-menu',
+            'scoreboard',
+            'touch-controls',
+            'utility-bar',
+          ])
+            $(id).hidden = true;
+          $('main-menu').hidden = false;
+          Audio.pause(true);
+          if (g) g.paused = true;
+        }
+        $('play').onclick = startMatch;
+        $('play-again').onclick = startMatch;
+        $('end-menu').onclick = mainMenu;
+        $('return-menu').onclick = mainMenu;
+        $('resume').onclick = () => setPause(false);
+        $('pause-button').onclick = () => setPause(true);
+        $('buy-button').onclick = () => (buyOpen ? closeBuy() : openBuy());
+        $('buy-close').onclick = closeBuy;
+        $('buy-back').onclick = () => buyNumber(0);
+        $('score-button').onclick = () => {
+          scoreToggle = !scoreToggle;
+          renderScoreboard();
+        };
+        $('score-close').onclick = () => {
+          scoreToggle = scoreHeld = false;
+          renderScoreboard();
+        };
+        $('fullscreen-button').onclick = () => {
+          if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+          else document.documentElement.requestFullscreen?.().catch(() => {});
+        };
+        function nextSpectator() {
+          const allies = g.actors.filter((a) => a.id !== 0 && a.alive && a.faction === 0);
+          if (allies.length) {
+            const i = allies.findIndex((a) => a.id === spectating);
+            spectating = allies[(i + 1) % allies.length].id;
+          }
+        }
+        function viewedActor() {
+          const a = g.actors[0];
+          if (a.alive) return a;
+          let view = g.actors.find((a) => a.id === spectating && a.alive && a.faction === 0);
+          if (!view) {
+            view = g.actors.find((a) => a.alive && a.faction === 0);
+            if (view) spectating = view.id;
+          }
+          return view || null;
+        }
+        function scoreTable() {
+          const table = document.createElement('table'),
+            head = table.createTHead().insertRow();
+          for (const title of ['PLAYER', 'SIDE', 'K', 'D', '$', 'PING']) {
+            const cell = document.createElement('th');
+            cell.textContent = title;
+            head.append(cell);
+          }
+          const body = table.createTBody();
+          for (const faction of [0, 1])
+            for (const a of g.actors
+              .filter((a) => a.faction === faction)
+              .sort((a, b) => b.kills - a.kills)) {
+              const row = body.insertRow();
+              row.className = (!a.alive ? 'dead ' : '') + (a.id === 0 ? 'me' : '');
+              for (const text of [
+                a.name + (a.alive ? '' : ' †'),
+                C.actorSide(g, a),
+                a.kills,
+                a.deaths,
+                a.money,
+                32 + a.id * 7,
+              ])
+                row.insertCell().textContent = String(text);
+            }
+          return table;
+        }
+        function renderScoreboard() {
+          if (!g) return;
+          $('scoreboard').hidden = !(scoreHeld || scoreToggle);
+          if (scoreHeld || scoreToggle) $('score-table').replaceChildren(scoreTable());
+        }
+        function clock(t) {
+          const sec = Math.max(0, Math.ceil(t));
+          return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
+        }
+        function updateHud() {
+          if (!g || !playing) return;
+          const a = g.actors[0],
+            view = viewedActor() || a,
+            w = a.weapons[a.active],
+            cfg = C.WEAPONS[a.active],
+            b = g.bomb,
+            side = C.actorSide(g, a);
+          $('ct-score').textContent = g.scores[g.side.indexOf('CT')];
+          $('t-score').textContent = g.scores[g.side.indexOf('T')];
+          $('timer').textContent = clock(b.state === 'planted' ? b.timer : g.clock);
+          $('timer').style.color = b.state === 'planted' ? '#f3a65b' : '#fff3d4';
+          $('phase').textContent =
+            `${g.phase === 'freeze' ? 'BUY PHASE' : g.phase === 'intermission' ? 'ROUND ENDED' : b.state === 'planted' ? 'BOMB PLANTED' : 'ROUND LIVE'} · ROUND ${Math.min(30, g.totalRounds + (g.phase === 'intermission' ? 0 : 1))} / 30`;
+          $('money').textContent = `$${a.money}`;
+          $('health').textContent = Math.ceil(a.hp);
+          $('armor').textContent = `${Math.ceil(a.armor)}${a.helmet ? ' ◇' : ''}`;
+          $('weapon-name').textContent =
+            cfg?.name.toUpperCase() || C.UTILITY[a.active]?.name.toUpperCase() || 'C4 BOMB';
+          $('ammo').textContent = w
+            ? cfg.slot === 'knife'
+              ? '—'
+              : `${w.mag} / ${w.reserve}`
+            : a.active === 'bomb'
+              ? 'C4'
+              : `${a.utility[a.active] || 0}`;
+          if (w?.reload) $('weapon-name').textContent = `RELOADING · ${w.reload.toFixed(1)}s`;
+          $('buy-button').disabled = g.phase !== 'freeze';
+          $('announcement').textContent = g.announcementTime > 0 ? g.announcement : '';
+          let instruction =
+            g.phase === 'freeze'
+              ? '15 SECOND FREEZE · PRESS B TO BUY'
+              : side === 'T'
+                ? 'Escort the carrier. Take site A or B.'
+                : 'Defend bomb sites A and B.';
+          if (b.state === 'carried' && b.owner === 0)
+            instruction = C.siteAt(a.pos)
+              ? `HOLD ${settings.bindings.use.replace('Key', '')} TO PLANT · 3s`
+              : 'YOU CARRY THE BOMB · REACH SITE A OR B';
+          else if (b.state === 'dropped') instruction = 'BOMB DROPPED · T players can pick it up.';
+          else if (b.state === 'planted')
+            instruction =
+              side === 'CT'
+                ? horizontalDefuse(a, b)
+                  ? `HOLD ${settings.bindings.use.replace('Key', '')} TO DEFUSE · ${a.kit ? 5 : 10}s`
+                  : `RETAKE SITE ${b.site} · ${clock(b.timer)}`
+                : `DEFEND SITE ${b.site} · ${clock(b.timer)}`;
+          if (!a.alive) instruction = 'You are out for this round. No mid-round respawn.';
+          $('objective-text').textContent = instruction;
+          $('progress').hidden = b.user !== 0 || b.progress === 0;
+          const duration = b.state === 'planted' ? (a.kit ? 5 : 10) : 3;
+          $('progress-fill').style.width = `${Math.min(100, (b.progress / duration) * 100)}%`;
+          $('spectate').hidden = a.alive;
+          $('spectate').textContent =
+            view.id !== 0
+              ? `SPECTATING ${view.name} · SPACE / JUMP TO CYCLE`
+              : 'WATCHING THE OBJECTIVE';
+          const motion = Math.hypot(a.vel.x, a.vel.z),
+            gap = 7 + Math.min(25, motion * 1.5 + (w?.shots || 0) * 1.1 + (a.grounded ? 0 : 12));
+          $('crosshair').style.setProperty('--gap', `${gap}px`);
+          $('crosshair').hidden = a.scope > 0 || !a.alive;
+          $('scope').style.display = a.scope && a.alive ? 'block' : 'none';
+          $('hitmarker').style.opacity = a.hitMarker > 0 ? 1 : 0;
+          $('damage-wash').style.opacity = C.clamp(a.hitTime * 0.9, 0, 0.7);
+          $('flash-wash').style.opacity = C.clamp(a.flashBlind * 0.75, 0, 0.99);
+          $('damage-direction').style.opacity = a.hitTime > 0 ? 1 : 0;
+          $('damage-direction').style.transform = `rotate(${a.hitYaw}rad)`;
+          const killFeed = $('kill-feed');
+          killFeed.replaceChildren();
+          for (const kill of g.feed.filter((k) => g.time - k.time < 6)) {
+            const el = document.createElement('div');
+            el.className = 'kill';
+            el.textContent = `${kill.attacker}  ${kill.weapon === 'Knife' ? '†' : '⌁'} ${kill.weapon}${kill.head ? ' ◎' : ''}  ${kill.victim}`;
+            el.style.color = kill.faction === 0 ? '#b6dbe2' : '#e8c995';
+            killFeed.append(el);
+          }
+          const p = a.pos;
+          $('location').textContent = C.siteAt(p)
+            ? `BOMB SITE ${C.siteAt(p).name}`
+            : p.z > 25
+              ? 'T SPAWN'
+              : p.z < -32
+                ? 'CT SPAWN'
+                : p.x < -21
+                  ? 'B TUNNELS'
+                  : p.x > 21
+                    ? 'LONG A'
+                    : p.z < 0
+                      ? 'MID DOORS'
+                      : 'T COURTYARD';
+          renderRadar();
+          if (scoreHeld || scoreToggle) renderScoreboard();
+          const score = a.kills * 100 + g.scores[0] * 1000;
+          if (score !== lastScore) {
+            lastScore = score;
+            post('score', { score });
+          }
+        }
+        function horizontalDefuse(a, b) {
+          return C.horizontal(a.pos, b.pos) < 2.25;
+        }
+        function renderRadar() {
+          const ctx = $('radar').getContext('2d'),
+            scale = 2.55,
+            a = g.actors[0],
+            e = C.eye(a);
+          ctx.fillStyle = '#16282dcc';
+          ctx.fillRect(0, 0, 236, 236);
+          const pos = (p) => ({ x: 118 + p.x * scale, y: 118 + p.z * scale });
+          ctx.fillStyle = '#b3a477';
+          for (const b of g.world.boxes) {
+            if (b.y - b.h / 2 > 2) continue;
+            const p = pos(b);
+            ctx.fillRect(
+              p.x - (b.w * scale) / 2,
+              p.y - (b.d * scale) / 2,
+              b.w * scale,
+              b.d * scale,
+            );
+          }
+          for (const s of C.SITES) {
+            const p = pos(s);
+            ctx.fillStyle = s.name === 'A' ? '#d0a56b80' : '#87aba080';
+            ctx.fillRect(
+              p.x - (s.w * scale) / 2,
+              p.y - (s.d * scale) / 2,
+              s.w * scale,
+              s.d * scale,
+            );
+            ctx.fillStyle = '#eee2c2';
+            ctx.font = 'bold 15px system-ui';
+            ctx.fillText(s.name, p.x - 5, p.y + 5);
+          }
+          for (const other of g.actors)
+            if (other.alive) {
+              const ally = other.faction === a.faction,
+                spotted =
+                  ally ||
+                  g.actors.some(
+                    (friend) =>
+                      friend.alive &&
+                      friend.faction === a.faction &&
+                      C.horizontal(friend.pos, other.pos) < 35 &&
+                      C.lineOfSight(g, C.eye(friend), C.eye(other)),
+                  );
+              if (!spotted) continue;
+              const p = pos(other.pos);
+              ctx.fillStyle = other.id === 0 ? '#fff7d1' : ally ? '#9bd3df' : '#e99a65';
+              ctx.beginPath();
+              ctx.arc(p.x, p.y, other.id === 0 ? 5 : 3.5, 0, Math.PI * 2);
+              ctx.fill();
+              if (other.id === 0) {
+                const d = C.direction(other.yaw);
+                ctx.strokeStyle = '#fff7d1';
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(p.x + d.x * 11, p.y + d.z * 11);
+                ctx.stroke();
+              }
+            }
+          if (g.bomb.state === 'planted' || g.bomb.state === 'dropped') {
+            const p = pos(g.bomb.pos);
+            ctx.fillStyle = '#f8cb6d';
+            ctx.fillRect(p.x - 4, p.y - 4, 8, 8);
+          }
+        }
+        function finishMatch() {
+          release('finished');
+          clearInput();
+          $('match-end').hidden = false;
+          $('match-result').textContent =
+            g.winner === -1
+              ? '15–15. Match drawn.'
+              : g.winner === 0
+                ? 'Your team wins.'
+                : 'The other team wins.';
+          $('match-summary').textContent =
+            `${g.scores[0]}–${g.scores[1]} · ${g.totalRounds} rounds · ${g.actors[0].kills} eliminations · ${g.actors[0].deaths} deaths`;
+          $('final-table').replaceChildren(scoreTable());
+          if (!endedPosted) {
+            endedPosted = true;
+            post('end', { score: g.actors[0].kills * 100 + g.scores[0] * 1000 });
+          }
+        }
+        function consumeEvents() {
+          if (!g) return;
+          for (const e of g.events) {
+            if (e.type === 'shot') {
+              shotEffect(e);
+              Audio.cue('shot', e.origin, e.weapon);
+            } else if (e.type === 'impact') impact(e);
+            else if (e.type === 'damage') {
+              particles(e.pos, '#bd624c', 7, 2);
+              if (e.actor === 0) Audio.tone(100, 0.06, 0.05);
+            } else if (e.type === 'round') {
+              clearEffects();
+              rebuildCharacters();
+              if (buyOpen) closeBuy();
+            } else if (e.type === 'live') {
+              if (buyOpen) closeBuy();
+              Audio.cue('pickup');
+            } else if (e.type === 'match-end') finishMatch();
+            else if (
+              [
+                'footstep',
+                'reload',
+                'beep',
+                'bounce',
+                'explosion',
+                'flash',
+                'plant',
+                'defuse',
+                'buy',
+                'pickup',
+                'win',
+                'interaction',
+              ].includes(e.type)
+            ) {
+              Audio.cue(e.type, e.pos, e.type === 'win' ? e.side : undefined);
+              if (e.type === 'flash' && g.actors[0].flashBlind > 0)
+                Audio.tone(2900, Math.min(4, g.actors[0].flashBlind), 0.025);
+              if (e.type === 'explosion') particles(e.pos, '#f5c675', 35, 10);
+            }
+          }
+          g.events.length = 0;
+        }
+        function updateObjects(alpha, dt) {
+          const view = viewedActor();
+          for (const a of g.actors) {
+            const c = characters.get(a.id);
+            if (!c) continue;
+            c.group.visible = a.id !== view?.id;
+            c.group.position.set(
+              a.prev.x + (a.pos.x - a.prev.x) * alpha,
+              a.prev.y + (a.pos.y - a.prev.y) * alpha,
+              a.prev.z + (a.pos.z - a.prev.z) * alpha,
+            );
+            c.group.rotation.y = a.yaw;
+            c.group.rotation.z = a.alive ? 0 : Math.PI / 2;
+            c.group.scale.y = a.crouching ? 0.67 : 1;
+            const stride =
+              Math.sin(g.time * 11 + a.id) * Math.min(0.45, Math.hypot(a.vel.x, a.vel.z) * 0.07);
+            c.leftLeg.rotation.x = stride;
+            c.rightLeg.rotation.x = -stride;
+            c.muzzle.visible = a.muzzle > 0 && a.alive;
+            c.marker.visible = a.faction === 0 && a.alive;
+            c.rifle.scale.z = C.WEAPONS[a.active]?.slot === 'pistol' ? 0.55 : 1;
+          }
+          const b = g.bomb;
+          bombMesh.visible = b.state === 'planted' || b.state === 'dropped';
+          if (bombMesh.visible) {
+            bombMesh.position.set(b.pos.x, C.floorAt(g.world, b.pos.x, b.pos.z) + 0.05, b.pos.z);
+            bombMesh.rotation.y = g.time * 0.1;
+          }
+          const activeGrenades = new Set();
+          for (const n of g.grenades) {
+            activeGrenades.add(n.id);
+            let mesh = grenadeMeshes.get(n.id);
+            if (!mesh) {
+              mesh = new T.Mesh(
+                new T.SphereGeometry(0.12, 8, 6),
+                material(n.kind === 'he' ? '#697e4f' : n.kind === 'flash' ? '#d0d6bf' : '#909d84'),
+              );
+              scene.add(mesh);
+              grenadeMeshes.set(n.id, mesh);
+            }
+            mesh.position.set(n.pos.x, n.pos.y, n.pos.z);
+            mesh.rotation.x = g.time * 8;
+          }
+          for (const [id, mesh] of grenadeMeshes)
+            if (!activeGrenades.has(id)) {
+              disposeGroup(mesh);
+              grenadeMeshes.delete(id);
+            }
+          const liveClouds = new Set();
+          for (const cloud of g.smokes) {
+            liveClouds.add(cloud.id);
+            let entry = smokeMeshes.get(cloud.id);
+            if (!entry) {
+              const group = new T.Group(),
+                mat = new T.MeshLambertMaterial({
+                  color: '#aeb4a2',
+                  transparent: true,
+                  opacity: 0.38,
+                  depthWrite: false,
+                }),
+                geo = new T.SphereGeometry(1, 8, 6);
+              for (let i = 0; i < 22; i++) {
+                const mesh = new T.Mesh(geo, mat);
+                const angle = i * 2.4,
+                  radius = Math.sqrt(i / 22) * 3.9;
+                mesh.position.set(
+                  Math.cos(angle) * radius,
+                  0.6 + (i % 5) * 0.55,
+                  Math.sin(angle) * radius,
+                );
+                mesh.scale.setScalar(1.4 + (i % 3) * 0.3);
+                group.add(mesh);
+              }
+              group.position.set(cloud.pos.x, cloud.pos.y, cloud.pos.z);
+              scene.add(group);
+              entry = { group, mat };
+              smokeMeshes.set(cloud.id, entry);
+            }
+            entry.group.scale.setScalar(Math.min(1, (18 - cloud.time) * 1.5));
+            entry.mat.opacity = 0.42 * Math.min(1, cloud.time / 2);
+            entry.group.rotation.y = g.time * 0.035;
+          }
+          for (const [id, entry] of smokeMeshes)
+            if (!liveClouds.has(id)) {
+              disposeGroup(entry.group);
+              smokeMeshes.delete(id);
+            }
+          updatePools(dt);
+          if (view) {
+            camera.position.set(
+              view.prev.x + (view.pos.x - view.prev.x) * alpha,
+              view.prev.y + (view.pos.y - view.prev.y) * alpha + (view.crouching ? 1.03 : 1.65),
+              view.prev.z + (view.pos.z - view.prev.z) * alpha,
+            );
+            camera.rotation.set(view.pitch + view.recoilPitch, view.yaw + view.recoilYaw, 0, 'YXZ');
+            camera.fov = view.scope === 2 ? 15 : view.scope === 1 ? 35 : settings.fov;
+            camera.updateProjectionMatrix();
+            Audio.listen(view);
+          } else {
+            camera.position.set(b.pos.x + 8, b.pos.y + 10, b.pos.z + 8);
+            camera.lookAt(b.pos.x, b.pos.y, b.pos.z);
+          }
+          const player = g.actors[0],
+            active = g.bomb.user === 0 ? 'bomb' : player.active;
+          if (gunKey !== active) buildGun(active);
+          gunModel.visible = player.alive && !player.scope;
+          gunFlash.visible = player.muzzle > 0 && Boolean(C.WEAPONS[active]) && active !== 'knife';
+          const speed = Math.hypot(player.vel.x, player.vel.z),
+            w = player.weapons[player.active],
+            config = C.WEAPONS[player.active],
+            reloadProgress = w?.reload ? 1 - w.reload / (config?.reload || 1) : 0,
+            lower = w?.reload ? Math.sin(reloadProgress * Math.PI) * 0.22 : 0;
+          gunModel.position.set(
+            0.27 + Math.sin(g.time * 7) * speed * 0.002,
+            -0.26 + Math.cos(g.time * 14) * speed * 0.002 - lower - player.drawTime * 0.7,
+            -0.56 + player.muzzle * 0.7,
+          );
+          gunModel.rotation.set(
+            w?.reload ? -0.5 * Math.sin(reloadProgress * Math.PI) : player.recoilPitch * 0.5,
+            -player.recoilYaw * 0.6,
+            w?.reload ? -0.25 * Math.sin(reloadProgress * Math.PI) : 0,
+          );
+        }
+        function renderFrame(time) {
+          const realDt = lastTime ? Math.min(0.1, (time - lastTime) / 1000) : 0;
+          lastTime = time;
+          if (playing && g) {
+            if (!localPaused && !externalPaused && g.phase !== 'finished') {
+              accumulator = Math.min(0.1, accumulator + realDt);
+              while (accumulator >= C.DT) {
+                C.step(g, C.DT, input());
+                pressed.clear();
+                mouse.firePressed = false;
+                touch.jump = false;
+                accumulator -= C.DT;
+                consumeEvents();
+              }
+            } else accumulator = 0;
+            updateObjects(accumulator / C.DT, localPaused || externalPaused ? 0 : realDt);
+            if (time - lastHud > 100) {
+              updateHud();
+              lastHud = time;
+            }
+          } else {
+            camera.position.set(Math.sin(time * 0.000035) * 7 + 27, 12, 11);
+            camera.lookAt(12, 0, -18);
+            camera.fov = settings.fov;
+            camera.updateProjectionMatrix();
+          }
+          renderer.autoClear = true;
+          renderer.render(scene, camera);
+          if (playing && g?.actors[0].alive && !g.actors[0].scope) {
+            renderer.autoClear = false;
+            renderer.clearDepth();
+            renderer.render(weaponScene, weaponCamera);
+          }
+          requestAnimationFrame(renderFrame);
+        }
+        window.addEventListener('message', (e) => {
+          if (e.source !== parent || e.origin !== location.origin) return;
+          const data = e.data;
+          if (data?.type === 'strike-zone:pause') {
+            setPause(Boolean(data.paused), true);
+            post('pause-state', { paused: Boolean(data.paused) });
+          }
+        });
+        window.StrikeZone = {
+          version: '3D · Three.js r128',
+          snapshot: () =>
+            g
+              ? {
+                  phase: g.phase,
+                  clock: g.clock,
+                  paused: g.paused,
+                  round: g.totalRounds + 1,
+                  scores: [...g.scores],
+                  bomb: {
+                    state: g.bomb.state,
+                    timer: g.bomb.timer,
+                    progress: g.bomb.progress,
+                    owner: g.bomb.owner,
+                  },
+                  actors: g.actors.map((a) => ({
+                    id: a.id,
+                    name: a.name,
+                    side: C.actorSide(g, a),
+                    alive: a.alive,
+                    hp: a.hp,
+                    armor: a.armor,
+                    money: a.money,
+                    pos: { ...a.pos },
+                    active: a.active,
+                    ammo: a.weapons[a.active]?.mag,
+                    reserve: a.weapons[a.active]?.reserve,
+                    kit: a.kit,
+                    scope: a.scope,
+                    ai: a.ai.state,
+                  })),
+                }
+              : null,
+        };
+        resize();
+        requestAnimationFrame(renderFrame);
+      })();
+    </script>
+  </body>
+</html>

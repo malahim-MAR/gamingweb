@@ -79,7 +79,9 @@ export function GameShell({
         setSession({ seed: crypto.getRandomValues(new Uint32Array(1))[0] });
         setStatus(
           game.localOnly
-            ? 'Local play. Scores for this game stay on this device.'
+            ? game.memoryOnly
+              ? 'Local tactical match. Settings and match data stay in memory.'
+              : 'Local play. Scores for this game stay on this device.'
             : game.slug === 'connect-4'
               ? 'Online results save automatically. Local games are for practice.'
               : 'Practice mode. Sign in to save scores and build a streak.',
@@ -91,7 +93,7 @@ export function GameShell({
     } finally {
       setStarting(false);
     }
-  }, [gated, signedIn, game.slug, game.localOnly]);
+  }, [gated, signedIn, game.slug, game.localOnly, game.memoryOnly]);
   useEffect(() => {
     if (!started.current) {
       started.current = true;
@@ -134,8 +136,9 @@ export function GameShell({
   const end = useCallback(
     (points: number, actions: unknown[]) => {
       setScore(points);
-      setResult(true);
-      if (game.localOnly) {
+      if (game.slug !== 'strike-zone') setResult(true);
+      if (game.memoryOnly) setStatus('Local match complete. Start another match inside the game.');
+      if (game.localOnly && !game.memoryOnly) {
         try {
           const key = `playroom:best:${game.slug}`;
           const best = Math.max(points, Number(localStorage.getItem(key)) || 0);
@@ -147,7 +150,7 @@ export function GameShell({
       }
       void submit({ score: points, actions });
     },
-    [submit, game.localOnly, game.slug],
+    [submit, game.localOnly, game.slug, game.memoryOnly],
   );
   const scoreChange = useCallback((points: number) => setScore(points), []);
   const GameComponent = gameComponents[game.slug];

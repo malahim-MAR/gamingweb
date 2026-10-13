@@ -21,6 +21,7 @@ export interface Game {
   instructions: string[];
   tag: string;
   localOnly?: boolean;
+  memoryOnly?: boolean;
 }
 export interface LeaderboardRow {
   user_id: string;

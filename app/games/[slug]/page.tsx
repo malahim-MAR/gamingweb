@@ -105,8 +105,9 @@ export default async function GamePage({ params }: { params: Promise<{ slug: str
           </p>
           {game.localOnly ? (
             <div className="rounded-xl bg-muted p-4 text-xs leading-6 text-muted-foreground">
-              Your best score saves on this device. Use the pause button for a breather, or restart
-              for a fresh round.{' '}
+              {game.memoryOnly
+                ? 'Strike Zone keeps settings and match data in memory. Buy during the freeze phase and play the bomb objective. Use the game’s fullscreen button for an immersive view.'
+                : 'Your best score saves on this device. Use the pause button for a breather, or restart for a fresh round.'}{' '}
               {game.category === 'Board'
                 ? 'Choose the computer or play with a friend on the same device.'
                 : 'Keyboard and touch controls are both available.'}
